@@ -1,0 +1,86 @@
+.form-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: var(--app-radius-card);
+  background: var(--app-surface);
+}
+
+.form-identity-poster {
+  flex: none;
+  width: 56px;
+}
+
+.form-identity-inputs {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.form-identity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-identity-meta .type-select {
+  width: auto;
+}
+
+.release-year {
+  flex: none;
+  color: var(--app-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.title-input,
+.type-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--app-ink);
+  font: inherit;
+}
+
+.title-input {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.type-select {
+  color: var(--app-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.duplicate-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: var(--app-radius-card);
+  background: var(--app-accent-soft);
+  color: var(--app-accent-ink);
+  font-size: 0.875rem;
+}
+
+.duplicate-hint button {
+  flex: none;
+  min-height: 44px;
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.delete-entry {
+  min-height: 48px;
+  margin-top: 28px;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-danger);
+  font-weight: 500;
+}

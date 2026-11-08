@@ -1,0 +1,30 @@
+.settings-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  color: var(--app-accent);
+  font-size: 1rem;
+  text-align: start;
+}
+
+.settings-note {
+  margin: 8px 0 0;
+  color: var(--app-ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.tmdb-logo {
+  display: block;
+  height: 14px;
+}
+
+.settings-version {
+  margin: 6px 0 0;
+  color: var(--app-ink-soft);
+  font-size: 0.8125rem;
+  text-align: center;
+}

@@ -1,0 +1,212 @@
+:root {
+  --ion-font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Arial Hebrew', sans-serif;
+
+  --ion-color-primary: #5b4bdb;
+  --ion-color-primary-rgb: 91, 75, 219;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #5042c1;
+  --ion-color-primary-tint: #6b5ddf;
+
+  --ion-color-danger: #b3261e;
+  --ion-color-danger-rgb: 179, 38, 30;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #9e211a;
+  --ion-color-danger-tint: #bb3c35;
+
+  --ion-background-color: #eef0fa;
+  --ion-background-color-rgb: 238, 240, 250;
+  --ion-text-color: #1e2140;
+  --ion-text-color-rgb: 30, 33, 64;
+  --ion-toolbar-background: var(--ion-background-color);
+
+  --app-ground: var(--ion-background-color);
+  --app-surface: #ffffff;
+  --app-ink: var(--ion-text-color);
+  --app-ink-soft: #565a7e;
+  --app-accent: var(--ion-color-primary);
+  --app-accent-soft: #e5e2fb;
+  --app-accent-ink: #3f32a8;
+  --app-well: #dde0ef;
+  --app-danger: var(--ion-color-danger);
+  --app-shadow: 0 6px 18px rgba(60, 64, 120, 0.12);
+  --app-shadow-poster: 0 4px 12px rgba(30, 33, 64, 0.16);
+
+  --app-radius-tile: 28px;
+  --app-radius-panel: 26px;
+  --app-radius-card: 20px;
+  --app-radius-poster: 18px;
+  --app-radius-pill: 999px;
+}
+
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+button,
+a {
+  transition: opacity 120ms ease-out;
+}
+
+button:active:not(:disabled),
+a:active {
+  opacity: 0.65;
+}
+
+::selection {
+  background: var(--app-accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+ion-content::part(scroll) {
+  scrollbar-width: none;
+}
+
+.floating-tab-bar {
+  --background: var(--app-surface);
+  --border: 0;
+  --color: var(--app-ink-soft);
+  --color-selected: var(--app-accent);
+  position: absolute;
+  inset-inline: 16px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10;
+  height: 60px;
+  padding: 0;
+  border-radius: 30px;
+  box-shadow: var(--app-shadow);
+}
+
+.floating-tab-bar ion-label {
+  font-size: 0.6875rem;
+}
+
+.floating-tab-bar .tab-selected ion-label {
+  font-weight: 700;
+}
+
+.floating-tab-bar .tab-selected .tab-icon-grid {
+  stroke: none;
+}
+
+.floating-tab-bar .tab-selected .tab-icon-grid rect {
+  fill: currentColor;
+}
+
+.floating-tab-bar .tab-selected .tab-icon-line {
+  stroke-width: 2.8;
+}
+
+.page-body {
+  min-height: 100%;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2.125rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card {
+  padding: 14px 16px;
+  border-radius: var(--app-radius-panel);
+  background: var(--app-surface);
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.icon-button {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--app-surface);
+  color: var(--app-accent);
+  font-size: 1.375rem;
+}
+
+.icon-button-primary {
+  background: var(--app-accent);
+  color: var(--ion-color-primary-contrast);
+}
+
+.field {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font: inherit;
+  font-size: 1rem;
+  text-align: start;
+}
+
+.field::placeholder {
+  color: var(--app-ink-soft);
+  opacity: 1;
+}
+
+.pill {
+  flex: none;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: var(--app-radius-pill);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-size: 0.9375rem;
+}
+
+.pill[aria-pressed='true'] {
+  background: var(--app-accent);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 500;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

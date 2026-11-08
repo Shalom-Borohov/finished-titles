@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T13:00:00Z",
+  "title": "Design System: סיימתי",
+  "extensions": {
+    "colorMeta": {
+      "lavender-ground": { "role": "neutral", "displayName": "Lavender Ground", "canonical": "#eef0fa", "tonalRamp": ["#0a0b0e", "#25262c", "#43444c", "#64666e", "#878992", "#acadb5", "#cccdd2", "#eeeef0"] },
+      "surface-white": { "role": "neutral", "displayName": "Surface White", "canonical": "#ffffff", "tonalRamp": ["#0b0b0b", "#262626", "#454545", "#666666", "#898989", "#aeaeae", "#cecece", "#eeeeee"] },
+      "navy-ink": { "role": "neutral", "displayName": "Navy Ink", "canonical": "#1e2140", "tonalRamp": ["#080a18", "#21243e", "#3d4264", "#5e6387", "#8086ac", "#a6accc", "#c8cce2", "#eceef6"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#565a7e", "tonalRamp": ["#090918", "#21233e", "#3e4264", "#5f6387", "#8186ac", "#a7abcc", "#c9cce2", "#edeef6"] },
+      "well": { "role": "neutral", "displayName": "Well", "canonical": "#dde0ef", "tonalRamp": ["#0a0b10", "#24262f", "#424450", "#636572", "#868896", "#abadb9", "#cccdd5", "#eeeef1"] },
+      "violet-accent": { "role": "primary", "displayName": "Quiet Violet", "canonical": "#5b4bdb", "tonalRamp": ["#0b0037", "#24007a", "#3d1baf", "#5948d8", "#7970ff", "#9d9eff", "#c1c6ff", "#e9ecff"] },
+      "violet-soft": { "role": "primary", "displayName": "Violet Wash", "canonical": "#e5e2fb", "tonalRamp": ["#0b0a12", "#262434", "#454256", "#666378", "#89869d", "#aeabbf", "#cdccd9", "#eeeef2"] },
+      "violet-deep": { "role": "primary", "displayName": "Deep Violet", "canonical": "#3f32a8", "tonalRamp": ["#090031", "#21066e", "#3a2aa1", "#5751c9", "#7777f2", "#9da2ff", "#c1c8ff", "#eaedff"] },
+      "danger": { "role": "functional", "displayName": "Danger Red", "canonical": "#b3261e", "tonalRamp": ["#270000", "#5c0000", "#8c0000", "#b62921", "#e05446", "#fc8778", "#ffb7ab", "#ffe7e2"] },
+      "placeholder-lilac": { "role": "placeholder", "displayName": "Placeholder Lilac", "canonical": "#d9d4fb", "tonalRamp": ["#0b0916", "#27223b", "#454060", "#666183", "#8984a8", "#adaac8", "#cdcbdf", "#eeedf5"] },
+      "placeholder-sky": { "role": "placeholder", "displayName": "Placeholder Sky", "canonical": "#cfe0fa", "tonalRamp": ["#060b14", "#1c2737", "#38465b", "#58677d", "#7b8aa2", "#a2afc3", "#c6cedc", "#eceff3"] },
+      "placeholder-blush": { "role": "placeholder", "displayName": "Placeholder Blush", "canonical": "#f7d9e6", "tonalRamp": ["#11080c", "#332029", "#553d48", "#775e69", "#9b808c", "#bea7b1", "#d8c9cf", "#f2edef"] },
+      "placeholder-mint": { "role": "placeholder", "displayName": "Placeholder Mint", "canonical": "#d3efe6", "tonalRamp": ["#040d0b", "#182b25", "#334b44", "#536c65", "#769088", "#9eb4ad", "#c3d1cd", "#ebf0ee"] },
+      "placeholder-apricot": { "role": "placeholder", "displayName": "Placeholder Apricot", "canonical": "#fbe6c8", "tonalRamp": ["#110a02", "#31240f", "#534228", "#756348", "#99866a", "#bcab94", "#d7ccbd", "#f2eee8"] },
+      "placeholder-mauve": { "role": "placeholder", "displayName": "Placeholder Mauve", "canonical": "#e3d9f5", "tonalRamp": ["#0d0912", "#292234", "#494057", "#6a6179", "#8d849d", "#b1aabf", "#d0cbd9", "#efedf2"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles, one per screen." },
+      "count": { "displayName": "Count", "purpose": "The violet total on each Home tile." },
+      "title-field": { "displayName": "Title field", "purpose": "The title being edited in the sheet." },
+      "section-title": { "displayName": "Section title", "purpose": "Panel headings on stats and settings." },
+      "item-title": { "displayName": "Item title", "purpose": "Tile labels and search result titles." },
+      "body": { "displayName": "Body", "purpose": "Field text and settings actions." },
+      "control": { "displayName": "Control", "purpose": "Pills, segments, secondary facts." },
+      "group-label": { "displayName": "Group label", "purpose": "Heading form groups." },
+      "poster-title": { "displayName": "Poster title", "purpose": "Titles under posters, cut to one line with an ellipsis." },
+      "note": { "displayName": "Note", "purpose": "Storage and attribution notes." },
+      "caption": { "displayName": "Caption", "purpose": "Rating words under posters, chart year labels, stats notes." },
+      "tab-label": { "displayName": "Tab label", "purpose": "Tab bar labels, bold when selected." }
+    },
+    "shadows": [
+      { "name": "ambient", "value": "0 6px 18px rgba(60, 64, 120, 0.12)", "purpose": "Home tiles and the floating tab bar." },
+      { "name": "poster", "value": "0 4px 12px rgba(30, 33, 64, 0.16)", "purpose": "Full-size posters in lists." },
+      { "name": "fan", "value": "0 3px 8px rgba(30, 33, 64, 0.22)", "purpose": "Each fanned poster, tighter and slightly darker so overlapping posters separate." }
+    ],
+    "motion": [
+      { "name": "press-dim", "value": "opacity 120ms ease-out, to 0.65", "purpose": "Pressed feedback on every button and link." },
+      { "name": "fan-open", "value": "transform 240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The Home fan opening under a press. Removed under reduced motion." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Type Tile with Poster Fan",
+      "kind": "custom",
+      "refersTo": "type-tile",
+      "description": "The signature: up to three recent posters fanned on a white tile, with the type's name and violet count.",
+      "html": "<a class=\"ds-tile\" href=\"#\" dir=\"rtl\"><span class=\"ds-fan\"><span class=\"ds-slot ds-slot-0\" style=\"background:#17415a\"></span><span class=\"ds-slot ds-slot-1\" style=\"background:#5b2017\"></span><span class=\"ds-slot ds-slot-2\" style=\"background:#3b405c\"></span></span><span class=\"ds-caption\"><span class=\"ds-label\">אנימה</span><span class=\"ds-count\">4</span></span></a>",
+      "css": ".ds-tile { position: relative; display: block; width: 170px; height: 148px; overflow: hidden; border-radius: var(--app-radius-tile, 28px); background: var(--app-surface, #fff); color: var(--app-ink, #1e2140); text-decoration: none; box-shadow: var(--app-shadow, 0 6px 18px rgba(60,64,120,.12)); font-family: Rubik, -apple-system, sans-serif; transition: opacity 120ms ease-out; } .ds-tile:active { opacity: .65; } .ds-tile:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; } .ds-fan { position: absolute; inset: 12px 0 auto; height: 84px; } .ds-slot { position: absolute; top: 0; left: 50%; width: 52px; height: 78px; margin-left: -26px; border-radius: 12px; box-shadow: 0 3px 8px rgba(30,33,64,.22); transition: transform 240ms cubic-bezier(.16,1,.3,1); } .ds-slot-0 { z-index: 3; transform: translate(32px,6px) rotate(10deg); } .ds-slot-1 { z-index: 2; transform: rotate(2deg); } .ds-slot-2 { z-index: 1; transform: translate(-32px,6px) rotate(-9deg); } .ds-tile:active .ds-slot-0 { transform: translate(38px,2px) rotate(14deg); } .ds-tile:active .ds-slot-2 { transform: translate(-38px,2px) rotate(-13deg); } .ds-caption { position: absolute; inset: auto 16px 10px; display: flex; align-items: baseline; justify-content: space-between; } .ds-label { font-size: 1.0625rem; font-weight: 500; } .ds-count { color: #5b4bdb; font-size: 1.375rem; font-weight: 700; }"
+    },
+    {
+      "name": "Floating Tab Bar",
+      "kind": "nav",
+      "refersTo": "floating-tab-bar",
+      "description": "The white pill bar that floats above all tabbed pages.",
+      "html": "<nav class=\"ds-tabs\" dir=\"rtl\"><a class=\"ds-tab ds-tab-on\" href=\"#\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"8\" height=\"8\" rx=\"2.5\"/><rect x=\"14\" y=\"4\" width=\"8\" height=\"8\" rx=\"2.5\"/><rect x=\"4\" y=\"14\" width=\"8\" height=\"8\" rx=\"2.5\"/><rect x=\"14\" y=\"14\" width=\"8\" height=\"8\" rx=\"2.5\"/></svg>בית</a><a class=\"ds-tab\" href=\"#\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 26 26\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 22V13M13 22V5M20 22v-6\"/></svg>סטטיסטיקה</a></nav>",
+      "css": ".ds-tabs { display: flex; height: 60px; border-radius: 30px; background: var(--app-surface, #fff); box-shadow: var(--app-shadow, 0 6px 18px rgba(60,64,120,.12)); font-family: Rubik, -apple-system, sans-serif; } .ds-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--app-ink-soft, #565a7e); font-size: .6875rem; text-decoration: none; transition: opacity 120ms ease-out; } .ds-tab:active { opacity: .65; } .ds-tab:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; } .ds-tab-on { color: var(--app-accent, #5b4bdb); font-weight: 700; }"
+    },
+    {
+      "name": "Add Button",
+      "kind": "button",
+      "refersTo": "icon-button-primary",
+      "description": "The primary action: a violet 48px circle with a white plus.",
+      "html": "<button class=\"ds-add\" type=\"button\" aria-label=\"הוספת כותר\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 22 22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11 4v14M4 11h14\"/></svg></button>",
+      "css": ".ds-add { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: var(--app-accent, #5b4bdb); color: #fff; transition: opacity 120ms ease-out; } .ds-add:active { opacity: .65; } .ds-add:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Round Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "A white 48px circle with a violet icon, used for back.",
+      "html": "<button class=\"ds-icon\" type=\"button\" aria-label=\"חזרה\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7 4l6 6-6 6\"/></svg></button>",
+      "css": ".ds-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: var(--app-surface, #fff); color: var(--app-accent, #5b4bdb); transition: opacity 120ms ease-out; } .ds-icon:active { opacity: .65; } .ds-icon:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Soft Button",
+      "kind": "button",
+      "refersTo": "button-soft",
+      "description": "The quiet action, used for manual entry.",
+      "html": "<button class=\"ds-soft\" type=\"button\">הוספה ידנית</button>",
+      "css": ".ds-soft { width: 280px; min-height: 52px; border: 0; border-radius: 999px; background: var(--app-accent-soft, #e5e2fb); color: var(--app-accent-ink, #3f32a8); font: 500 1rem Rubik, -apple-system, sans-serif; transition: opacity 120ms ease-out; } .ds-soft:active { opacity: .65; } .ds-soft:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "The white 46px search pill.",
+      "html": "<input class=\"ds-field\" dir=\"rtl\" placeholder=\"חיפוש\" />",
+      "css": ".ds-field { width: 280px; height: 46px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--app-surface, #fff); color: var(--app-ink, #1e2140); font: 400 1rem Rubik, -apple-system, sans-serif; } .ds-field::placeholder { color: var(--app-ink-soft, #565a7e); opacity: 1; } .ds-field:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "Rating words and status filters. Selected is solid violet.",
+      "html": "<div class=\"ds-pills\" dir=\"rtl\"><button class=\"ds-pill\" type=\"button\" aria-pressed=\"true\">היה בסדר</button><button class=\"ds-pill\" type=\"button\" aria-pressed=\"false\">אהבתי</button></div>",
+      "css": ".ds-pills { display: flex; gap: 6px; } .ds-pill { min-height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--app-surface, #fff); color: var(--app-ink, #1e2140); font: 400 .9375rem Rubik, -apple-system, sans-serif; transition: opacity 120ms ease-out; } .ds-pill[aria-pressed='true'] { background: var(--app-accent, #5b4bdb); color: #fff; font-weight: 500; } .ds-pill:active { opacity: .65; } .ds-pill:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "A well track holding pill segments, for status and date kind.",
+      "html": "<div class=\"ds-seg\" dir=\"rtl\"><button type=\"button\" aria-pressed=\"true\">סיימתי</button><button type=\"button\" aria-pressed=\"false\">עצרתי באמצע</button></div>",
+      "css": ".ds-seg { display: grid; grid-auto-columns: minmax(0,1fr); grid-auto-flow: column; width: 300px; padding: 3px; border-radius: 999px; background: var(--app-well, #dde0ef); } .ds-seg button { min-height: 44px; border: 0; border-radius: 999px; background: none; color: var(--app-ink, #1e2140); font: 400 .9375rem Rubik, -apple-system, sans-serif; transition: opacity 120ms ease-out; } .ds-seg button[aria-pressed='true'] { background: var(--app-surface, #fff); font-weight: 700; } .ds-seg button:active { opacity: .65; } .ds-seg button:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The flat white container on stats and settings.",
+      "html": "<section class=\"ds-panel\" dir=\"rtl\"><h2>לפי סוג</h2><div class=\"ds-row\"><span>אנימה</span><b>4</b></div></section>",
+      "css": ".ds-panel { width: 280px; padding: 14px 16px; border-radius: var(--app-radius-panel, 26px); background: var(--app-surface, #fff); color: var(--app-ink, #1e2140); font-family: Rubik, -apple-system, sans-serif; } .ds-panel h2 { margin: 0 0 10px; font-size: 1.0625rem; font-weight: 700; } .ds-row { display: flex; align-items: center; justify-content: space-between; min-height: 28px; font-size: .9375rem; } .ds-row b { color: var(--app-accent, #5b4bdb); font-weight: 700; }"
+    },
+    {
+      "name": "Poster with Title",
+      "kind": "card",
+      "refersTo": "poster",
+      "description": "A list item: a 2:3 poster over its left-to-right title and rating word.",
+      "html": "<button class=\"ds-title\" type=\"button\" dir=\"rtl\"><span class=\"ds-poster\"></span><span class=\"ds-name\" dir=\"ltr\">Dune: Part Two</span><span class=\"ds-verdict\">אהבתי מאוד</span></button>",
+      "css": ".ds-title { display: flex; flex-direction: column; gap: 5px; width: 113px; padding: 0; border: 0; background: none; color: var(--app-ink, #1e2140); font-family: Rubik, -apple-system, sans-serif; text-align: start; transition: opacity 120ms ease-out; } .ds-title:active { opacity: .65; } .ds-title:focus-visible { outline: 2px solid #5b4bdb; outline-offset: 2px; } .ds-poster { aspect-ratio: 2/3; border-radius: var(--app-radius-poster, 18px); background: #c8553d; box-shadow: var(--app-shadow-poster, 0 4px 12px rgba(30,33,64,.16)); } .ds-name { overflow: hidden; font-size: .8125rem; font-weight: 500; line-height: 1.3; text-align: right; text-overflow: ellipsis; white-space: nowrap; } .ds-verdict { color: var(--app-ink-soft, #565a7e); font-size: .75rem; line-height: 1.25; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Calm Light Room",
+    "overview": "The owner named this style \"Soft and light\". A whole collection across every medium hangs in a pale, quiet room, and the interface stays back so the posters can be looked at. The app's own surfaces are white and lavender, its ink is navy, and its one accent is violet; the rest of the color on screen comes from the things the owner has actually finished.\n\nThis is an iPhone app first: Ionic in iOS mode, a Hebrew right-to-left interface carrying left-to-right titles, phone-width only, and light only for now. Density is relaxed. Logging is rare and browsing is the reward, so controls are large, round and few, and the screens hold plain facts.\n\nThe owner rejected black poster grids, for both their structure and their colors. The Home screen is the answer to that rejection: six white tiles, each holding a small fan of recent posters, so the whole collection reads at a glance.",
+    "keyCharacteristics": [
+      "Pale lavender ground with white rounded surfaces and navy ink.",
+      "One violet for action, selection and counts; posters carry the rest of the color.",
+      "Round corners on everything the app draws.",
+      "The rotated three-poster fan on each Home tile is the signature.",
+      "A 44pt floor on every control.",
+      "Light only for now."
+    ],
+    "rules": [
+      { "name": "The Posters Carry the Color Rule", "body": "Posters are the only saturated color outside two functional signals: the violet accent and danger text. Violet marks action, selection, counts and chart bars; it never decorates. No second accent, no colored tile, no colored ground. The one outside exception is TMDB's required attribution logo on settings, which keeps its own colors.", "section": "colors" },
+      { "name": "The Plain Rating Rule", "body": "Rating words are never color-coded. Every rating bar is the same violet and every rating word is ink, so how it felt is read, not decoded.", "section": "colors" },
+      { "name": "The Three Weights Rule", "body": "Regular, medium and bold are the only weights loaded. Hierarchy comes from size and weight in navy; there is no uppercase and no tracking.", "section": "typography" },
+      { "name": "The Foreign Title Rule", "body": "English and romanized titles keep left-to-right direction but sit on the screen's right edge, aligned with the Hebrew around them.", "section": "typography" },
+      { "name": "The Collection Lifts Rule", "body": "Only the collection and the bar floating over it get a shadow. A form row or a data panel stays flat.", "section": "elevation" },
+      { "name": "The No Hard Corner Rule", "body": "A new surface takes a radius from the scale, and a new control is a pill or a circle. If a corner reads as square on screen, it is wrong.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do let posters carry the color; keep every ground, tile and panel white or lavender.",
+      "Do reserve violet for action, selection, counts and chart bars.",
+      "Do give every control at least a 44pt target. Use 48px for standalone icon buttons, 46px for fields, 44px for pills, segments and steppers.",
+      "Do take every radius from the scale, and make new controls pills or circles.",
+      "Do keep titles left-to-right and aligned to the right edge, and keep them to one line under a poster.",
+      "Do use the fan as Home's signature, with its rotations and overlap intact.",
+      "Do say stopped and rated states in words as well as any visual treatment."
+    ],
+    "donts": [
+      "Don't add a black poster wall or a dark poster-grid ground; the owner rejected both.",
+      "Don't introduce a dark theme or dark tokens until the owner decides on one. The app is light only for now.",
+      "Don't add a second accent or tint a tile, panel or ground with a saturated color.",
+      "Don't color-code rating words or rating bars by sentiment.",
+      "Don't use square corners on anything the app draws.",
+      "Don't put a shadow on panels, fields, pills or form rows.",
+      "Don't use danger red as a fill or for anything but destruction and errors.",
+      "Don't load another typeface or weight."
+    ]
+  }
+}

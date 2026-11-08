@@ -1,0 +1,15 @@
+export const SETTINGS_COPY = {
+  backup: 'גיבוי',
+  exportBackup: 'ייצוא גיבוי',
+  importBackup: 'ייבוא גיבוי',
+  backupFile: 'קובץ גיבוי',
+  storageNote: 'הרשימה שמורה רק בטלפון הזה. כדאי לייצא גיבוי מדי פעם.',
+  importWarning: 'הגיבוי יחליף את כל הרשימה הנוכחית. אי אפשר לבטל את זה.',
+  confirmImport: 'החלפת הרשימה',
+  backupRestored: 'הגיבוי שוחזר',
+  invalidBackup: 'קובץ הגיבוי לא תקין',
+  dataSources: 'מקורות',
+  tmdbLogoAlt: 'TMDB',
+  tmdbNotice: 'This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.',
+  version: (version: string) => `גרסה ${version}`,
+} as const

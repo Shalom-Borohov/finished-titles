@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "finished-titles-search",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-04",
+  "vars": {
+    "ALLOWED_ORIGINS": "https://shalom-borohov.github.io,http://localhost:5173"
+  }
+}

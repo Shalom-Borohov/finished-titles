@@ -1,0 +1,45 @@
+.poster {
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--app-radius-poster);
+  box-shadow: var(--app-shadow-poster);
+}
+
+.poster-dimmed {
+  opacity: 0.45;
+}
+
+.poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.poster-placeholder {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  color: var(--app-ink);
+  direction: ltr;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.poster-placeholder::before {
+  content: attr(data-title);
+}
+
+.poster-compact {
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.poster-compact .poster-placeholder::before {
+  content: none;
+}

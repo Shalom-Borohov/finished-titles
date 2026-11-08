@@ -1,0 +1,117 @@
+.stats-header {
+  margin-bottom: 4px;
+}
+
+.stats-header p {
+  margin: 2px 0 0;
+  color: var(--app-ink-soft);
+  font-size: 0.9375rem;
+}
+
+.stats-note {
+  margin: 8px 0 0;
+  color: var(--app-ink-soft);
+  font-size: 0.75rem;
+  text-wrap: balance;
+}
+
+.year-chart {
+  display: flex;
+  gap: 10px;
+  height: 130px;
+}
+
+.year-column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.year-count {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.year-track {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 0;
+}
+
+.year-bar {
+  width: 100%;
+  min-height: 8px;
+  border-radius: 12px;
+  background: var(--app-accent);
+}
+
+.year-label {
+  color: var(--app-ink-soft);
+  font-size: 0.75rem;
+}
+
+.type-counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  margin: 0;
+}
+
+.type-counts div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  font-size: 0.9375rem;
+}
+
+.type-counts dd {
+  margin: 0;
+  color: var(--app-accent);
+  font-weight: 700;
+}
+
+.rating-bars {
+  margin: 0;
+}
+
+.rating-bars div {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) 1.75rem;
+  grid-template-areas: 'label track count';
+  align-items: center;
+  column-gap: 8px;
+  min-height: 28px;
+  font-size: 0.875rem;
+}
+
+.rating-bars dt {
+  grid-area: label;
+}
+
+.rating-bars dd {
+  grid-area: count;
+  margin: 0;
+  font-weight: 700;
+  text-align: end;
+}
+
+.rating-track {
+  grid-area: track;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 5px;
+  background: var(--app-ground);
+}
+
+.rating-bar {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--app-accent);
+}
