@@ -12,7 +12,7 @@
 - `npm run build`: `tsc -b && vite build`. This is the type check.
 - In `worker/`: `npm test`, `npx tsc --noEmit`, `npm run dev`, `npx wrangler deploy`.
 
-The app reads the Worker's address from `VITE_SEARCH_URL`, kept in `.env.production`. Without it, search reports itself as unavailable and manual entry still works.
+The app reads the Worker's address from `VITE_SEARCH_URL`, kept in `.env.production`. Commit that file: GitHub Pages builds from the repo, so an uncommitted address never reaches the phone. Without it, search reports itself as unavailable and manual entry still works.
 
 ## Sources of truth
 
