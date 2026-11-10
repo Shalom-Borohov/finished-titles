@@ -4,6 +4,7 @@ export const COMMON_COPY = {
   stats: 'סטטיסטיקה',
   settings: 'הגדרות',
   cancel: 'ביטול',
+  close: 'סגירה',
   addTitle: 'הוספת כותר',
   actionFailed: 'הפעולה לא הצליחה',
   separator: ' · ',

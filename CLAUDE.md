@@ -36,3 +36,4 @@ Imports go downward only: `pages` → `data` / `domain` / `search` → `copy`. T
 - Storage isn't mocked: `fake-indexeddb` backs the real Dexie database. Call `resetDb` in `beforeEach`.
 - `test/helpers/searchService.ts` stubs the search service, and `freezeDate` pins "today".
 - jsdom has no layout, so check CSS changes in a browser.
+- `test/setup.ts` removes every injected `<style>` (Ionic's), because they made role queries slow enough to time out. Disabling them doesn't work, since jsdom ignores `sheet.disabled`. So `toBeVisible` ignores Ionic's CSS.

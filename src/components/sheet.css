@@ -1,0 +1,25 @@
+ion-modal {
+  --width: 100%;
+  --height: calc(100% - 54px - env(safe-area-inset-top));
+  --border-radius: 28px 28px 0 0;
+  --background: var(--app-ground);
+  --backdrop-opacity: 0.2;
+  --ion-backdrop-color: var(--app-ink);
+  --ion-safe-area-top: 0px;
+  align-items: flex-end;
+}
+
+ion-modal ion-toolbar {
+  --padding-top: 12px;
+}
+
+ion-modal ion-buttons ion-button {
+  height: 44px;
+}
+
+.sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 16px calc(24px + env(safe-area-inset-bottom));
+}
