@@ -1,4 +1,4 @@
-# סיימתי: design
+# כותרים: design
 
 A personal iPhone PWA that records every anime, series, movie, book, game and comic its owner has finished or stopped. This file is the source of truth for product behaviour. New behaviour is added as a new numbered decision: "(added YYYY-MM-DD, extends/clarifies N)".
 
@@ -79,5 +79,5 @@ A personal iPhone PWA that records every anime, series, movie, book, game and co
 30. **The look is "Soft and light":** a pale lavender ground, white rounded tiles, one violet accent, the Rubik font and a floating rounded tab bar. Chosen by the owner on 2026-11-06. It's light only in this version. Open gap: the owner hasn't been asked about dark mode.
 31. **Corners are round throughout.** Why: the owner's stated taste.
 32. **Hebrew UI, full RTL, with titles in their English or romanized form.** Titles are set left-to-right inside the RTL layout.
-33. **The name is סיימתי, and the folder and repo are `finished-titles`.** Why: the owner chose both because they say what the app is for, after rejecting מדיטק, Media Library and ספריית מדיה. Hebrew names aren't written in English letters, so the folder has its own English name (changed 2026-11-07).
+33. **The name is כותרים, and the folder and repo are `finished-titles`.** Why: a plain plural noun, like אימונים or תפילות, where each entry is one כותר. It covers all six types and both finished and stopped titles, which סיימתי did not (renamed from סיימתי 2026-11-10). Also rejected: מדיטק, Media Library, ספריית מדיה, מדף, סיפורים and עלילות. Hebrew names aren't written in English letters, so the folder has its own English name (changed 2026-11-07).
 34. **UI first-person wording avoids gender where possible,** for example "בלי תאריך" rather than "לא זוכר".

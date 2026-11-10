@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-11-07T13:00:00Z",
-  "title": "Design System: סיימתי",
+  "title": "Design System: כותרים",
   "extensions": {
     "colorMeta": {
       "lavender-ground": { "role": "neutral", "displayName": "Lavender Ground", "canonical": "#eef0fa", "tonalRamp": ["#0a0b0e", "#25262c", "#43444c", "#64666e", "#878992", "#acadb5", "#cccdd2", "#eeeef0"] },

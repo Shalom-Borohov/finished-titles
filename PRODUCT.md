@@ -40,7 +40,7 @@ Logging is rare, roughly once per finished title, so the app is not a daily habi
 
 ## Brand Commitments
 
-- Name: סיימתי. Folder and repo: `finished-titles`.
+- Name: כותרים. Folder and repo: `finished-titles`.
 - Voice: quiet and factual, a private record, not a coach.
 - Must feel at home as an iPhone app.
 

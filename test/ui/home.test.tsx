@@ -19,7 +19,7 @@ describe('home', () => {
     vi.spyOn(db.entries, 'toArray').mockReturnValue(new Dexie.Promise(() => {}))
     renderAt('/tabs/home')
 
-    expect(await screen.findByRole('heading', { name: 'סיימתי' })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'כותרים' })).toBeVisible()
     expect(screen.queryByRole('link', { name: /מה שראיתי/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /אנימה/ })).not.toBeInTheDocument()
   })
@@ -27,7 +27,7 @@ describe('home', () => {
   it('opens on home from the root path', async () => {
     renderAt('/')
 
-    expect(await screen.findByRole('heading', { name: 'סיימתי' })).toBeVisible()
+    expect(await screen.findByRole('heading', { name: 'כותרים' })).toBeVisible()
     expect(currentPath()).toBe('/tabs/home')
   })
 

@@ -1,5 +1,5 @@
 export const COMMON_COPY = {
-  appName: 'סיימתי',
+  appName: 'כותרים',
   home: 'בית',
   stats: 'סטטיסטיקה',
   settings: 'הגדרות',

@@ -1,5 +1,5 @@
 ---
-name: סיימתי
+name: כותרים
 description: A private record of every title finished or stopped, in a calm light room where the posters carry the color.
 colors:
   lavender-ground: "#eef0fa"
@@ -178,7 +178,7 @@ components:
     height: "60px"
 ---
 
-# Design System: סיימתי
+# Design System: כותרים
 
 ## Overview
 

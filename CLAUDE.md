@@ -2,7 +2,7 @@
 
 ## What this is
 
-סיימתי: a personal iPhone PWA recording every anime, series, movie, book, game and comic its owner has finished or stopped. Hebrew, RTL. All entries live in IndexedDB on the device, with a JSON backup file. Search goes through a small Cloudflare Worker in `worker/`, which holds the API keys.
+כותרים: a personal iPhone PWA recording every anime, series, movie, book, game and comic its owner has finished or stopped. Hebrew, RTL. All entries live in IndexedDB on the device, with a JSON backup file. Search goes through a small Cloudflare Worker in `worker/`, which holds the API keys.
 
 ## Commands
 
