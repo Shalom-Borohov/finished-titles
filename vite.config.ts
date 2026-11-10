@@ -22,8 +22,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'סיימתי',
-        short_name: 'סיימתי',
+        name: 'כותרים',
+        short_name: 'כותרים',
         lang: 'he',
         dir: 'rtl',
         display: 'standalone',
