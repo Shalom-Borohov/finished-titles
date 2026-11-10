@@ -11,6 +11,7 @@
 - `npm run lint`: oxlint.
 - `npm run build`: `tsc -b && vite build`. This is the type check.
 - In `worker/`: `npm test`, `npx tsc --noEmit`, `npm run dev`, `npx wrangler deploy`.
+- A push to `main` that changes `worker/` deploys the Worker through `.github/workflows/worker.yml` (spec 56). Run `npx wrangler deploy` by hand only to deploy outside that workflow.
 
 The app reads the Worker's address from `VITE_SEARCH_URL`, kept in `.env.production` (builds) and `.env.development` (`npm run dev`). Commit both files: GitHub Pages builds from the repo, so an uncommitted address never reaches the phone. Without it, search reports itself as unavailable and manual entry still works.
 
