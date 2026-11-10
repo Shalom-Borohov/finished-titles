@@ -68,6 +68,7 @@ A personal iPhone PWA that records every anime, series, movie, book, game and co
 49. **A request with no `Origin` header is refused too** (added 2026-11-07, clarifies 26).
 54. **The search service's address is committed in `.env.production`.** Why: GitHub Pages builds the app from the repo, so an address kept only on the laptop leaves search unavailable on the phone. The address isn't secret, because the TMDB token stays in the Worker (added 2026-11-08, clarifies 25).
 55. **The same address is also committed in `.env.development`,** so `npm run dev` on port 5173 searches for real. Tests run in Vitest's `test` mode, which reads neither file, and set the address themselves. Why: the Worker already allows `http://localhost:5173`, and without the file local search says it's unavailable (added 2026-11-09, extends 54).
+56. **A push to `main` that changes `worker/` deploys the Worker,** after its tests and type check pass, through the "Deploy search Worker" workflow. It uses a Cloudflare API token limited to editing Workers, saved as the repo secret `CLOUDFLARE_API_TOKEN`, with `CLOUDFLARE_ACCOUNT_ID` beside it. The Worker's own secrets, such as `TMDB_TOKEN`, are set in the Cloudflare dashboard and survive deploys. Why: otherwise a merged search fix passes every check while the phone keeps using the old search service. Decided by the owner on 2026-11-09 (added 2026-11-09, extends 25).
 50. **Small posters, on Home tiles and in the add sheet, show the placeholder's colour only,** because a title won't fit (added 2026-11-07, clarifies 27).
 
 ### Look and feel
