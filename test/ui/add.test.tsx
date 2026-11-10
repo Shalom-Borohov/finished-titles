@@ -218,6 +218,29 @@ describe('adding a title', () => {
     expect(await screen.findByText('החיפוש לא זמין כרגע. אפשר להוסיף ידנית.')).toBeVisible()
   })
 
+  it('skips results of a type or source this version does not know, and shows the rest', async () => {
+    stubSearchResults([
+      DUNE,
+      { source: 'tmdb', sourceId: 'comic/1', title: 'Dune: House Atreides', type: 'comic' },
+      { source: 'comicvine', sourceId: '42', title: 'Dune: The Graphic Novel', type: 'book' },
+    ])
+    renderAt('/tabs/home')
+    await searchFor('dune')
+
+    expect(await screen.findByRole('button', { name: /Dune.*סרט · 2021/ })).toBeVisible()
+    expect(screen.queryByText('Dune: House Atreides')).not.toBeInTheDocument()
+    expect(screen.queryByText('Dune: The Graphic Novel')).not.toBeInTheDocument()
+    expect(screen.queryByText('החיפוש לא זמין כרגע. אפשר להוסיף ידנית.')).not.toBeInTheDocument()
+  })
+
+  it('treats a result with no type as a failed search, rather than skipping it', async () => {
+    stubSearchResults([DUNE, { source: 'tmdb', sourceId: '1', title: 'Dune: Part Two' }])
+    renderAt('/tabs/home')
+    await searchFor('dune')
+
+    expect(await screen.findByText('החיפוש לא זמין כרגע. אפשר להוסיף ידנית.')).toBeVisible()
+  })
+
   it('disables saving as soon as save is pressed, so a double tap adds one title', async () => {
     renderAt('/tabs/home/comic')
     await openAdd()

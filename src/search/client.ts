@@ -1,16 +1,26 @@
-import { array, type InferOutput, number, object, optional, parse, picklist, string } from 'valibot'
+import { array, filterItems, type InferOutput, is, number, object, optional, parse, pick, picklist, pipe, string, unknown } from 'valibot'
 import { posterUrlSchema, SEARCH_SOURCES, SEARCHABLE_TYPES } from '../domain/types'
 
+const searchResultSchema = object({
+  source: picklist(SEARCH_SOURCES),
+  sourceId: string(),
+  title: string(),
+  type: picklist(SEARCHABLE_TYPES),
+  year: optional(number()),
+  posterUrl: optional(posterUrlSchema),
+})
+
+const kindSchema = object({ source: string(), type: string() })
+
+const knownKindSchema = pick(searchResultSchema, ['source', 'type'])
+
+const isUnknownKind = (result: unknown) => is(kindSchema, result) && !is(knownKindSchema, result)
+
 const searchResponseSchema = object({
-  results: array(
-    object({
-      source: picklist(SEARCH_SOURCES),
-      sourceId: string(),
-      title: string(),
-      type: picklist(SEARCHABLE_TYPES),
-      year: optional(number()),
-      posterUrl: optional(posterUrlSchema),
-    }),
+  results: pipe(
+    array(unknown()),
+    filterItems((result) => !isUnknownKind(result)),
+    array(searchResultSchema),
   ),
   unavailable: array(string()),
 })

@@ -3,10 +3,10 @@ import { vi } from 'vitest'
 export const SEARCH_URL = 'https://search.test'
 
 type StubResult = {
-  source: 'tmdb' | 'openlibrary' | 'igdb'
+  source: string
   sourceId: string
   title: string
-  type: 'anime' | 'series' | 'movie' | 'book' | 'game'
+  type?: string
   year?: number
   posterUrl?: string
 }
