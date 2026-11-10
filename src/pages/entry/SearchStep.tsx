@@ -1,6 +1,7 @@
 import { IonContent } from '@ionic/react'
 import { useEffect, useState } from 'react'
 import { Poster } from '../../components/Poster'
+import { SheetHeader } from '../../components/SheetHeader'
 import { COMMON_COPY } from '../../copy/common'
 import { MEDIA_TYPE_SINGULAR_LABELS } from '../../copy/labels'
 import { useAllEntries } from '../../data/hooks'
@@ -8,7 +9,6 @@ import { findExisting } from '../../domain/entries'
 import type { Entry } from '../../domain/types'
 import { type SearchResponse, type SearchResult, searchTitles } from '../../search/client'
 import { ENTRY_COPY } from './copy'
-import { SheetHeader } from './SheetHeader'
 import './searchStep.css'
 
 const MINIMUM_QUERY_LENGTH = 2

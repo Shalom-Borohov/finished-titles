@@ -56,6 +56,12 @@ export const ImportIcon = () => (
   </LineIcon>
 )
 
+export const ChatIcon = () => (
+  <LineIcon size={22} strokeWidth={2.2}>
+    <path d="M4 5h14v10H10l-4 3.5V15H4z" />
+  </LineIcon>
+)
+
 export const GridIcon = () => (
   <LineIcon size={26} strokeWidth={2} className="tab-icon-grid">
     <rect x="4" y="4" width="8" height="8" rx="2.5" />

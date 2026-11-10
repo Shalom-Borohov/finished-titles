@@ -19,6 +19,15 @@ function chooseFile(text: string) {
   })
 }
 
+async function openFeedback() {
+  fireEvent.click(await screen.findByRole('button', { name: 'דיווח על באג / הצעה' }))
+  await screen.findByText('פתיחה ב-GitHub')
+}
+
+function describeReport(text: string) {
+  fireEvent.change(screen.getByLabelText('תיאור'), { target: { value: text } })
+}
+
 async function readJson(file: Blob | undefined) {
   if (!file) {
     throw new Error('no file')
@@ -94,5 +103,73 @@ describe('settings', () => {
     renderAt('/tabs/settings')
 
     expect(await screen.findByText(/^גרסה \d+\.\d+\.\d+$/)).toBeVisible()
+  })
+
+  it('opens a GitHub bug report on finished-titles with the text and device details', async () => {
+    const openWindow = vi.spyOn(window, 'open').mockReturnValue(null)
+
+    renderAt('/tabs/settings')
+    await openFeedback()
+    describeReport('הכותר לא נשמר\nבחרתי סרט מהחיפוש')
+    fireEvent.click(screen.getByText('פתיחה ב-GitHub'))
+
+    expect(openWindow).toHaveBeenCalledOnce()
+
+    const [url, target, features] = openWindow.mock.calls[0]
+    const { origin, pathname, searchParams } = new URL(String(url))
+
+    expect(target).toBe('_blank')
+    expect(features).toBe('noopener')
+    expect(`${origin}${pathname}`).toBe('https://github.com/Shalom-Borohov/finished-titles/issues/new')
+    expect(searchParams.get('title')).toBe('הכותר לא נשמר')
+    expect(searchParams.get('labels')).toBe('bug')
+    expect(searchParams.get('body')).toBe(
+      `הכותר לא נשמר\nבחרתי סרט מהחיפוש\n\n### מכשיר\n${navigator.userAgent}\nגרסה: ${__APP_VERSION__} (${__APP_BUILT_AT__})`,
+    )
+  })
+
+  it('opens a suggestion with a shortened title, only once there is text', async () => {
+    const openWindow = vi.spyOn(window, 'open').mockReturnValue(null)
+    const idea = 'כדאי להוסיף אפשרות לסמן כותר כמתוכנן, כדי לראות ברשימה גם סדרות וספרים שעוד לא התחלתי ושכדאי לזכור'
+
+    renderAt('/tabs/settings')
+    await openFeedback()
+    fireEvent.click(screen.getByRole('button', { name: 'הצעה' }))
+
+    expect(screen.getByText('פתיחה ב-GitHub').closest('ion-button')).toHaveProperty('disabled', true)
+
+    describeReport(idea)
+    fireEvent.click(screen.getByText('פתיחה ב-GitHub'))
+
+    const { searchParams } = new URL(String(openWindow.mock.calls[0][0]))
+
+    expect(searchParams.get('labels')).toBe('feature')
+    expect(searchParams.get('title')).toBe(`${Array.from(idea).slice(0, 79).join('')}…`)
+  })
+
+  it('after opening, offers to close and says to try again if GitHub did not open', async () => {
+    vi.spyOn(window, 'open').mockReturnValue(null)
+
+    renderAt('/tabs/settings')
+    await openFeedback()
+
+    expect(screen.getByText('ביטול')).toBeVisible()
+
+    describeReport('הגיבוי לא נפתח')
+    fireEvent.click(screen.getByText('פתיחה ב-GitHub'))
+
+    expect(await screen.findByText('סגירה')).toBeVisible()
+    expect(screen.getByText('אם GitHub לא נפתח, אפשר ללחוץ שוב או להעתיק את הטקסט.')).toBeVisible()
+  })
+
+  it('warns that a report too long for the link will be cut', async () => {
+    renderAt('/tabs/settings')
+    await openFeedback()
+
+    expect(screen.queryByText(/הדיווח ארוך מדי לקישור/)).not.toBeInTheDocument()
+
+    describeReport('כתבתי דיווח ארוך מאוד '.repeat(200))
+
+    expect(await screen.findByText(/הדיווח ארוך מדי לקישור/)).toBeVisible()
   })
 })

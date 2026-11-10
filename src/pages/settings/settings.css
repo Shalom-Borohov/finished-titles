@@ -10,6 +10,19 @@
   text-align: start;
 }
 
+.feedback-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--app-ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.feedback-notes p {
+  margin: 0;
+}
+
 .settings-note {
   margin: 8px 0 0;
   color: var(--app-ink-soft);

@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
   base: '/finished-titles/',
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
+    __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()),
   },
   resolve: mode === 'test' ? { conditions: ['browser'] } : {},
   plugins: [

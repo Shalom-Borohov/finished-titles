@@ -20,6 +20,34 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 })
 
+function removeIonicStylesThatSlowRoleQueries() {
+  const removeAddedStyles = (records: MutationRecord[]) =>
+    records
+      .flatMap((record) => Array.from(record.addedNodes))
+      .forEach((node) => {
+        if (node instanceof HTMLStyleElement) {
+          node.remove()
+        }
+      })
+
+  const styleRemover = new MutationObserver(removeAddedStyles)
+
+  const watchStyles = (root: Node) => styleRemover.observe(root, { childList: true })
+
+  const attachShadow = Element.prototype.attachShadow
+
+  Element.prototype.attachShadow = function attachWatchedShadow(init) {
+    const shadowRoot = attachShadow.call(this, init)
+
+    watchStyles(shadowRoot)
+
+    return shadowRoot
+  }
+
+  watchStyles(document.head)
+}
+
+removeIonicStylesThatSlowRoleQueries()
 setupIonicReact({ mode: 'ios' })
 
 afterEach(() => {
