@@ -187,6 +187,10 @@ ion-content::part(scroll) {
   opacity: 1;
 }
 
+[dir='auto']:placeholder-shown {
+  direction: rtl;
+}
+
 .pill {
   flex: none;
   min-height: 44px;

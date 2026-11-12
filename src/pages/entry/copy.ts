@@ -28,6 +28,8 @@ export const ENTRY_COPY = {
   yearOnly: 'רק שנה',
   noDate: 'בלי תאריך',
   year: 'שנה',
+  oneYearLess: 'שנה אחת פחות',
+  oneYearMore: 'שנה אחת יותר',
   futureDate: 'התאריך לא יכול להיות בעתיד',
   invalidDate: 'התאריך לא תקין',
   invalidYear: 'צריך שנה בת ארבע ספרות',

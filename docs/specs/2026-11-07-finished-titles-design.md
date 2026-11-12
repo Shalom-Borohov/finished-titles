@@ -14,6 +14,7 @@ A personal iPhone PWA that records every anime, series, movie, book, game and co
 6. **Ratings are words, and optional:** אהוב במיוחד, אהבתי מאוד, אהבתי, היה בסדר, לא אהבתי. Why: the owner asked for how it felt rather than a score, with a way to mark true favourites. Optional so a half-remembered title never blocks logging.
 7. **The note is optional free text.**
 8. **The finish date is an exact date, a year, or blank.** It defaults to today, and future dates are not allowed. Why: right after finishing, no extra tap is needed; for old titles, blank is more honest than an invented year.
+61. **A year-only date has − and + buttons beside the year, and the year can still be typed.** + stops at this year, − stops at 1000 (the lowest four-digit year), and both buttons are off while the typed text isn't a four-digit year. They look like the season stepper. Why: a recent year is one or two taps, while titles from long ago, which year-only is mostly for, would need dozens of taps without typing. Decided by the owner on 2026-11-12 (added 2026-11-12, issue #10, extends 8).
 9. **A title is required, and nothing else is.** Why: PRODUCT principle "Never blocked". Type and status always have a value.
 
 ### Finding and adding titles
@@ -80,5 +81,6 @@ A personal iPhone PWA that records every anime, series, movie, book, game and co
 30. **The look is "Soft and light":** a pale lavender ground, white rounded tiles, one violet accent, the Rubik font and a floating rounded tab bar. Chosen by the owner on 2026-11-06. It's light only in this version. Open gap: the owner hasn't been asked about dark mode.
 31. **Corners are round throughout.** Why: the owner's stated taste.
 32. **Hebrew UI, full RTL, with titles in their English or romanized form.** Titles are set left-to-right inside the RTL layout.
+62. **An empty field whose direction follows its text (search, title, note, feedback) shows its Hebrew placeholder right to left. Typed text takes the direction of its first letter, so English titles read left to right.** The list search stays right to left. Why: with no text, a `dir="auto"` field falls back to left to right and lays out a Hebrew placeholder backwards, with its punctuation on the wrong side. This is the same fix as restaurant-visits (added 2026-11-12, issue #10, clarifies 32).
 33. **The name is כותרים, and the folder and repo are `finished-titles`.** Why: a plain plural noun, like אימונים or תפילות, where each entry is one כותר. It covers all six types and both finished and stopped titles, which סיימתי did not (renamed from סיימתי 2026-11-10). Also rejected: מדיטק, Media Library, ספריית מדיה, מדף, סיפורים and עלילות. Hebrew names aren't written in English letters, so the folder has its own English name (changed 2026-11-07).
 34. **UI first-person wording avoids gender where possible,** for example "בלי תאריך" rather than "לא זוכר".
