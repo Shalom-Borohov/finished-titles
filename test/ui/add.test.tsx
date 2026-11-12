@@ -167,6 +167,47 @@ describe('adding a title', () => {
     expect((await savedEntries())[0].finishedOn).toBe('2019')
   })
 
+  it('steps the year back without typing', async () => {
+    stubSearchResults([DUNE])
+    renderAt('/tabs/home')
+    await searchFor('dune')
+    await pickResult(/Dune/)
+    await pressButton('רק שנה')
+    await pressButton('שנה אחת פחות')
+    await pressButton('שנה אחת פחות')
+    await save()
+
+    expect((await savedEntries())[0].finishedOn).toBe('2024')
+  })
+
+  it('steps the year forward only up to this year', async () => {
+    stubSearchResults([DUNE])
+    renderAt('/tabs/home')
+    await searchFor('dune')
+    await pickResult(/Dune/)
+    await pressButton('רק שנה')
+
+    expect(await screen.findByRole('button', { name: 'שנה אחת יותר' })).toBeDisabled()
+
+    await pressButton('שנה אחת פחות')
+    await pressButton('שנה אחת יותר')
+    await save()
+
+    expect((await savedEntries())[0].finishedOn).toBe('2026')
+  })
+
+  it('stops stepping while the typed year is incomplete', async () => {
+    stubSearchResults([DUNE])
+    renderAt('/tabs/home')
+    await searchFor('dune')
+    await pickResult(/Dune/)
+    await pressButton('רק שנה')
+    fireEvent.change(await screen.findByLabelText('שנה'), { target: { value: '201' } })
+
+    expect(screen.getByRole('button', { name: 'שנה אחת פחות' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'שנה אחת יותר' })).toBeDisabled()
+  })
+
   it('records no date', async () => {
     stubSearchResults([DUNE])
     renderAt('/tabs/home')

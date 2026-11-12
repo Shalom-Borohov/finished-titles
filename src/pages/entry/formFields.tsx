@@ -1,6 +1,8 @@
+import { useId } from 'react'
 import { Segmented } from '../../components/formFields'
 import { MinusIcon, PlusIcon } from '../../components/icons'
 import { RATING_LABELS } from '../../copy/labels'
+import { finishYear, isYearOnly } from '../../domain/finishDate'
 import { type Rating, RATINGS } from '../../domain/types'
 import { ENTRY_COPY } from './copy'
 import { DATE_KINDS, type EntryFormState } from './formState'
@@ -71,6 +73,57 @@ export function SeasonStepper({ label, season, onChange }: SeasonStepperProps) {
   )
 }
 
+type YearStepperProps = {
+  yearText: string
+  thisYear: number
+  onChange: (yearText: string) => void
+}
+
+function YearStepper({ yearText, thisYear, onChange }: YearStepperProps) {
+  const inputId = useId()
+  const year = Number(yearText)
+  const hasYear = isYearOnly(yearText)
+  const canLower = hasYear && isYearOnly(String(year - 1))
+  const canRaise = hasYear && year < thisYear
+  const stepTo = (next: number) => onChange(String(next))
+
+  return (
+    <div className="stepper">
+      <label className="stepper-label" htmlFor={inputId}>
+        {ENTRY_COPY.year}
+      </label>
+      <span className="stepper-controls">
+        <button
+          type="button"
+          className="icon-button"
+          aria-label={ENTRY_COPY.oneYearLess}
+          disabled={!canLower}
+          onClick={() => stepTo(year - 1)}
+        >
+          <MinusIcon />
+        </button>
+        <input
+          id={inputId}
+          className="stepper-year"
+          type="number"
+          inputMode="numeric"
+          value={yearText}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <button
+          type="button"
+          className="icon-button"
+          aria-label={ENTRY_COPY.oneYearMore}
+          disabled={!canRaise}
+          onClick={() => stepTo(year + 1)}
+        >
+          <PlusIcon />
+        </button>
+      </span>
+    </div>
+  )
+}
+
 type DateFieldsProps = {
   legend: string
   form: EntryFormState
@@ -102,15 +155,7 @@ export function DateFields({ legend, form, today, problem, onChange }: DateField
         </label>
       )}
       {form.dateKind === 'year' && (
-        <label className="date-row">
-          <span>{ENTRY_COPY.year}</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={form.yearText}
-            onChange={(event) => onChange({ yearText: event.target.value })}
-          />
-        </label>
+        <YearStepper yearText={form.yearText} thisYear={finishYear(today)} onChange={(yearText) => onChange({ yearText })} />
       )}
       {problem && (
         <p className="form-problem" role="alert">
