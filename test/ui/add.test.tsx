@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../src/data/db'
+import { openAdd, pickResult, pressButton, save, savedEntries, searchFor } from '../helpers/addFlow'
 import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
@@ -17,27 +18,6 @@ const DUNE = {
 } as const
 
 const SEVERANCE = { source: 'tmdb', sourceId: '95396', title: 'Severance', type: 'series', year: 2022 } as const
-
-const pressButton = async (name: string) => fireEvent.click(await screen.findByRole('button', { name }))
-
-const openAdd = async () => pressButton('הוספת כותר')
-
-async function searchFor(query: string) {
-  await openAdd()
-  fireEvent.change(await screen.findByLabelText('חיפוש כותר'), { target: { value: query } })
-}
-
-async function pickResult(name: RegExp) {
-  fireEvent.click(await screen.findByRole('button', { name }))
-}
-
-async function savedEntries() {
-  await waitFor(async () => expect(await db.entries.count()).toBeGreaterThan(0))
-
-  return db.entries.toArray()
-}
-
-const save = async () => fireEvent.click(await screen.findByText('שמירה'))
 
 const saveButton = async () => (await screen.findByText('שמירה')).closest('ion-button')
 
@@ -276,7 +256,7 @@ describe('adding a title', () => {
   })
 
   it('says search failed, not that nothing was found, when no source answered', async () => {
-    stubSearchResults([], ['tmdb', 'openlibrary'])
+    stubSearchResults([], { unavailable: ['tmdb', 'openlibrary'] })
     renderAt('/tabs/home')
     await searchFor('dune')
 
@@ -347,7 +327,7 @@ describe('adding a title', () => {
   })
 
   it('says when a source is missing from the results', async () => {
-    stubSearchResults([DUNE], ['igdb'])
+    stubSearchResults([DUNE], { unavailable: ['igdb'] })
     renderAt('/tabs/home')
     await searchFor('dune')
 

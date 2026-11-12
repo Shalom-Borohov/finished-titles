@@ -1,12 +1,19 @@
 import { describe, expect, it, vi } from 'vitest'
-import { APP_ORIGIN, BASE_ENV, callWorker, requestTo, search, searchBody, stubUpstreams } from './helpers/worker'
+import {
+  ALLOWED_ORIGIN_HEADERS,
+  BASE_ENV,
+  callWorker,
+  requestTo,
+  search,
+  searchBody,
+  stubUpstreams,
+  TMDB_HOST,
+} from './helpers/worker'
 
-const TMDB_HOST = 'api.themoviedb.org'
 const OPEN_LIBRARY_HOST = 'openlibrary.org'
 const TWITCH_HOST = 'id.twitch.tv'
 const IGDB_HOST = 'api.igdb.com'
 const SOURCE_DEADLINE_MS = 8000
-const ALLOWED_ORIGIN_HEADERS = { Origin: APP_ORIGIN }
 
 const ALL_SOURCES_ENV = {
   ...BASE_ENV,
@@ -157,19 +164,27 @@ describe('query validation', () => {
 })
 
 describe('routing', () => {
-  it.each(['/', '/search/', '/other', '/search/extra'])('answers 404 for the path %s', async (path) => {
+  it.each(['/', '/search/', '/other', '/search/extra', '/seasons/', '/seasons/1396', '/season'])(
+    'answers 404 for the path %s',
+    async (path) => {
+      const requests = stubUpstreams({})
+
+      const response = await callWorker(`${path}?q=dune&tv=1396`, { headers: ALLOWED_ORIGIN_HEADERS })
+
+      expect(response.status).toBe(404)
+      expect(requests).toEqual([])
+    },
+  )
+
+  it.each(
+    ['POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'].flatMap((method) => [
+      [method, '/search?q=dune'],
+      [method, '/seasons?tv=1396'],
+    ]),
+  )('answers 404 for %s on %s', async (method, path) => {
     const requests = stubUpstreams({})
 
-    const response = await callWorker(`${path}?q=dune`, { headers: ALLOWED_ORIGIN_HEADERS })
-
-    expect(response.status).toBe(404)
-    expect(requests).toEqual([])
-  })
-
-  it.each(['POST', 'PUT', 'PATCH', 'DELETE', 'HEAD'])('answers 404 for %s on /search', async (method) => {
-    const requests = stubUpstreams({})
-
-    const response = await callWorker('/search?q=dune', { method, headers: ALLOWED_ORIGIN_HEADERS })
+    const response = await callWorker(path, { method, headers: ALLOWED_ORIGIN_HEADERS })
 
     expect(response.status).toBe(404)
     expect(requests).toEqual([])
