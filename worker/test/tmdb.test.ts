@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { BASE_ENV, requestTo, searchBody, stubUpstreams } from './helpers/worker'
+import { BASE_ENV, requestTo, searchBody, stubUpstreams, TMDB_ENV, TMDB_HOST } from './helpers/worker'
 
-const TMDB_HOST = 'api.themoviedb.org'
 const OPEN_LIBRARY_HOST = 'openlibrary.org'
-const TMDB_ENV = { ...BASE_ENV, TMDB_TOKEN: 'tmdb-test-token' }
 const ANIMATION_GENRE = 16
 const DRAMA_GENRE = 18
 

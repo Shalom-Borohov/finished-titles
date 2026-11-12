@@ -14,16 +14,18 @@ import { type Entry, isMediaType, isShowType, MEDIA_TYPES, STATUSES } from '../.
 import { ENTRY_COPY } from './copy'
 import { DateFields, RatingPills, SeasonStepper } from './formFields'
 import { dateProblem, draftFromForm, type EntryFormState } from './formState'
+import { useSeasonPrefill } from './useSeasonPrefill'
 import './entryForm.css'
 
 type EntryFormProps = {
   initial: EntryFormState
   editing?: Entry
+  seasonsTvId?: string
   onOpenExisting: (entry: Entry) => void
   onClose: () => void
 }
 
-export function EntryForm({ initial, editing, onOpenExisting, onClose }: EntryFormProps) {
+export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClose }: EntryFormProps) {
   const [form, setForm] = useState(initial)
   const [isSaving, setIsSaving] = useState(false)
   const [presentAlert] = useIonAlert()
@@ -36,6 +38,10 @@ export function EntryForm({ initial, editing, onOpenExisting, onClose }: EntryFo
   const problem = dateProblem(form, today)
   const hasTitle = form.title.trim() !== ''
   const duplicate = !editing && !isSaving && hasTitle ? findExisting(entries ?? [], form) : undefined
+
+  useSeasonPrefill(seasonsTvId, (seasons) =>
+    setForm((current) => (current.seasons === undefined ? { ...current, seasons } : current)),
+  )
 
   async function save() {
     const draft = draftFromForm(form)

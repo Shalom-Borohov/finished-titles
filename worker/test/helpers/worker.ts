@@ -6,6 +6,9 @@ export const APP_ORIGIN = 'https://shalom-borohov.github.io'
 export const LOCAL_ORIGIN = 'http://localhost:5173'
 export const OTHER_ORIGIN = 'https://not-the-app.example'
 export const BASE_ENV: Env = { ALLOWED_ORIGINS: `${APP_ORIGIN},${LOCAL_ORIGIN}` }
+export const ALLOWED_ORIGIN_HEADERS = { Origin: APP_ORIGIN }
+export const TMDB_HOST = 'api.themoviedb.org'
+export const TMDB_ENV: Env = { ...BASE_ENV, TMDB_TOKEN: 'tmdb-test-token' }
 
 const WORKER_URL = 'https://finished-titles-search.example'
 
@@ -61,7 +64,7 @@ export function callWorker(path: string, init: RequestInit, env: Env = BASE_ENV)
 export function search(query: string, env: Env = BASE_ENV) {
   const params = new URLSearchParams({ q: query })
 
-  return callWorker(`/search?${params}`, { headers: { Origin: APP_ORIGIN } }, env)
+  return callWorker(`/search?${params}`, { headers: ALLOWED_ORIGIN_HEADERS }, env)
 }
 
 export async function searchBody(query: string, env: Env = BASE_ENV) {

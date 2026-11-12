@@ -1,19 +1,23 @@
-import { maxLength, minLength, pipe, safeParse, string, trim } from 'valibot'
+import { maxLength, minLength, pipe, regex, safeParse, string, trim } from 'valibot'
 import { corsHeaders, forbiddenResponse, isAllowedOrigin, preflightResponse } from './cors'
 import { searchIgdb } from './igdb'
 import { searchOpenLibrary } from './openLibrary'
-import { searchTmdb } from './tmdb'
+import { searchTmdb, tmdbAiredSeasons } from './tmdb'
 import type { Env, SearchResponse } from './types'
 
 const SEARCH_PATH = '/search'
-const SEARCH_METHOD = 'GET'
+const SEASONS_PATH = '/seasons'
+const READ_METHOD = 'GET'
 const PREFLIGHT_METHOD = 'OPTIONS'
 const QUERY_PARAMETER = 'q'
+const TV_PARAMETER = 'tv'
 const MIN_QUERY_LENGTH = 2
 const MAX_QUERY_LENGTH = 100
+const DIGITS_ONLY = /^\d+$/
 const SOURCE_DEADLINE_MS = 8000
 const BAD_REQUEST_STATUS = 400
 const NOT_FOUND_STATUS = 404
+const BAD_GATEWAY_STATUS = 502
 
 const SOURCES = [
   { name: 'tmdb', search: searchTmdb },
@@ -22,6 +26,7 @@ const SOURCES = [
 ] as const
 
 const querySchema = pipe(string(), trim(), minLength(MIN_QUERY_LENGTH), maxLength(MAX_QUERY_LENGTH))
+const tvIdSchema = pipe(string(), regex(DIGITS_ONLY))
 
 function rejectAtDeadline(): Promise<never> {
   return new Promise((_resolve, reject) => {
@@ -55,16 +60,34 @@ export default {
     const headers = corsHeaders(origin)
     const url = new URL(request.url)
 
-    if (request.method !== SEARCH_METHOD || url.pathname !== SEARCH_PATH) {
+    if (request.method !== READ_METHOD) {
       return new Response(null, { status: NOT_FOUND_STATUS, headers })
     }
 
-    const query = safeParse(querySchema, url.searchParams.get(QUERY_PARAMETER))
+    if (url.pathname === SEARCH_PATH) {
+      const query = safeParse(querySchema, url.searchParams.get(QUERY_PARAMETER))
 
-    if (!query.success) {
-      return new Response(null, { status: BAD_REQUEST_STATUS, headers })
+      if (!query.success) {
+        return new Response(null, { status: BAD_REQUEST_STATUS, headers })
+      }
+
+      return Response.json(await searchAllSources(query.output, env), { headers })
     }
 
-    return Response.json(await searchAllSources(query.output, env), { headers })
+    if (url.pathname === SEASONS_PATH) {
+      const tvId = safeParse(tvIdSchema, url.searchParams.get(TV_PARAMETER))
+
+      if (!tvId.success) {
+        return new Response(null, { status: BAD_REQUEST_STATUS, headers })
+      }
+
+      try {
+        return Response.json({ seasons: await tmdbAiredSeasons(tvId.output, env) }, { headers })
+      } catch {
+        return new Response(null, { status: BAD_GATEWAY_STATUS, headers })
+      }
+    }
+
+    return new Response(null, { status: NOT_FOUND_STATUS, headers })
   },
 } satisfies ExportedHandler<Env>
