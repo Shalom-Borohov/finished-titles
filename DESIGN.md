@@ -169,7 +169,6 @@ components:
     height: "48px"
   sheet:
     backgroundColor: "{colors.lavender-ground}"
-    rounded: "{rounded.tile}"
   floating-tab-bar:
     backgroundColor: "{colors.surface-white}"
     textColor: "{colors.ink-soft}"
@@ -254,13 +253,13 @@ A tinted, cool neutral room with one violet voice and pictures supplying the res
 
 A single phone column with 16px gutters and no width breakpoints; columns flex with the screen. Page tops and bottoms respect the safe area, and every tabbed page reserves 96px of bottom clearance so the last row clears the floating tab bar.
 
-Home is a large title with total and add button, a search pill, then a two-column tile grid with 12px gaps and a full-width Other row. Lists are a three-column poster grid (16px between rows, 10px between columns). Stats and settings are stacks of white panels 10px apart. The add and edit sheet is a stack of groups 14px apart, opening from 54px below the safe area so the page behind stays visible at the top.
+Home is a large title with total and add button, a search pill, then a two-column tile grid with 12px gaps and a full-width Other row. Lists are a three-column poster grid (16px between rows, 10px between columns). Stats and settings are stacks of white panels 10px apart. Every sheet is a stack of groups 14px apart, opening full screen with its header below the status bar.
 
 Reading order runs right to left: the title sits at the right, the add button at the left. Poster aspect is always 2:3.
 
 ## Elevation & Depth
 
-Hybrid and mostly flat. White on lavender does most of the work. Soft, downward, navy-tinted shadows appear only on three things: Home tiles, posters, and the floating tab bar. Panels, fields, pills, form rows and icon buttons are flat. The sheet lifts over a 20% navy backdrop with no shadow of its own.
+Hybrid and mostly flat. White on lavender does most of the work. Soft, downward, navy-tinted shadows appear only on three things: Home tiles, posters, and the floating tab bar. Panels, fields, pills, form rows and icon buttons are flat. The sheet slides up over a 20% navy backdrop with no shadow of its own.
 
 ### Shadow Vocabulary
 - **Ambient** (`box-shadow: 0 6px 18px rgba(60, 64, 120, 0.12)`): Home tiles and the floating tab bar.
@@ -274,12 +273,12 @@ Small posters inside the sheet and search results carry no shadow.
 
 ## Shapes
 
-Everything the app draws has round corners; this is the owner's stated taste and the shipped build honors it. Radius follows size: tiles and the top of the sheet are the softest (tile), then panels (panel), form cards and search results (card), posters (poster), and small posters and year bars (poster-small). Controls are full pills or circles. Rating tracks are fully rounded at 10px tall (bar).
+Everything the app draws has round corners, except where a surface meets the screen edge; this is the owner's stated taste and the shipped build honors it. Radius follows size: tiles are the softest (tile), then panels (panel), form cards and search results (card), posters (poster), and small posters and year bars (poster-small). Controls are full pills or circles. Rating tracks are fully rounded at 10px tall (bar).
 
-The sheet's bottom corners are square because it runs off the screen edge. Line icons have round caps and joins, and the grid tab icon's squares are themselves rounded. Ionic's stock alert still shows its own tighter corners, off-white fill and hairline dividers; that is an unthemed default, not a pattern to copy.
+The sheet's corners are square because it fills the screen. Line icons have round caps and joins, and the grid tab icon's squares are themselves rounded. Ionic's stock alert still shows its own tighter corners, off-white fill and hairline dividers; that is an unthemed default, not a pattern to copy.
 
 ### Named Rules
-**The No Hard Corner Rule.** A new surface takes a radius from the scale, and a new control is a pill or a circle. If a corner reads as square on screen, it is wrong.
+**The No Hard Corner Rule.** A new surface takes a radius from the scale, and a new control is a pill or a circle. If a corner reads as square on screen, it is wrong, unless the surface runs off the screen edge there, as the full-screen sheet does.
 
 ## Components
 
@@ -329,7 +328,7 @@ The app icon repeats the fan in violet, so the signature starts on the Home Scre
 ### Navigation
 - **Floating tab bar:** A white 60px pill, 16px from each side and 12px above the safe area, ambient shadow, content scrolling beneath it.
 - **Tabs:** Soft ink at rest. Selected turns violet with a bold label and a heavier icon: the grid icon fills and line icons thicken from 2.2 to 2.8.
-- **Sheet:** Lavender, top corners at the tile radius, flat header with a centered title.
+- **Sheet:** Lavender, full screen with square corners, flat header with a centered title.
 
 ### Icons
 Inline line SVGs in currentColor with round caps and joins, 20 to 26px, at stroke weights from 2 to 2.4, always decorative beside a label or an accessible name.
