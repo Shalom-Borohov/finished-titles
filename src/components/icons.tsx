@@ -44,6 +44,12 @@ export const BackChevronIcon = () => (
   </LineIcon>
 )
 
+export const ForwardChevronIcon = () => (
+  <LineIcon size={20} strokeWidth={2.4}>
+    <path d="M13 4l-6 6 6 6" />
+  </LineIcon>
+)
+
 export const ShareIcon = () => (
   <LineIcon size={22} strokeWidth={2.2}>
     <path d="M11 13V3M7 6.5 11 3l4 3.5M6 10H5v9h12v-9h-1" />

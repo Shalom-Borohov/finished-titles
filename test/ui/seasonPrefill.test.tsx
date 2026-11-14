@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../src/data/db'
 import { pickResult, pressButton, save, savedEntries, searchFor } from '../helpers/addFlow'
@@ -6,15 +6,11 @@ import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
 import { renderAt } from '../helpers/renderAt'
-import { SEARCH_URL, seasonsCalls, stubSearchResults } from '../helpers/searchService'
-
-const SEVERANCE = { source: 'tmdb', sourceId: 'tv/95396', title: 'Severance', type: 'series', year: 2022 } as const
+import { DUNE, jsonReply, SEARCH_URL, seasonsCalls, SEVERANCE, stubSearchResults } from '../helpers/searchService'
 
 const FRIEREN = { source: 'tmdb', sourceId: 'tv/209867', title: 'Frieren', type: 'anime', year: 2023 } as const
 
-const DUNE = { source: 'tmdb', sourceId: 'movie/438631', title: 'Dune', type: 'movie', year: 2021 } as const
-
-const seasonsReply = (seasons: number) => async () => Response.json({ seasons })
+const seasonsReply = (seasons: number) => jsonReply({ seasons })
 
 const seasonsShown = () => screen.getByText('עונות שראיתי').closest('.stepper')?.querySelector('.stepper-count')
 
@@ -142,6 +138,94 @@ describe('prefilling seasons watched', () => {
 
     expect(seasonsShown()).toHaveTextContent('—')
     expect(seasonsCalls(fetchStub)).toEqual([])
+  })
+
+  describe('the years a show ran', () => {
+    const showReply = (seasons: number, endYear?: number) => jsonReply({ seasons, endYear })
+
+    const releaseYearShown = () => document.querySelector('.release-year')
+
+    it('shows the years an ended show ran and saves its end year', async () => {
+      stubSearchResults([SEVERANCE], { seasonsReply: showReply(3, 2025) })
+      renderAt('/tabs/home')
+      await searchFor('severance')
+      await pickResult(/Severance/)
+
+      await waitFor(() => expect(releaseYearShown()).toHaveTextContent('2022–2025'))
+      expect(releaseYearShown()).toHaveAttribute('dir', 'ltr')
+      expect(seasonsShown()).toHaveTextContent('3')
+
+      await save()
+
+      expect((await savedEntries())[0]).toMatchObject({ seasons: 3, endYear: 2025 })
+    })
+
+    it('shows only the start year for a show still running', async () => {
+      const fetchStub = stubSearchResults([SEVERANCE], { seasonsReply: showReply(3) })
+
+      renderAt('/tabs/home')
+      await searchFor('severance')
+      await pickResult(/Severance/)
+      await waitFor(() => expect(seasonsShown()).toHaveTextContent('3'))
+
+      expect(seasonsCalls(fetchStub)).toHaveLength(1)
+      expect(releaseYearShown()).toHaveTextContent(/^2022$/)
+
+      await save()
+
+      expect((await savedEntries())[0].endYear).toBeUndefined()
+    })
+
+    it('shows one year for a show that started and ended the same year', async () => {
+      stubSearchResults([SEVERANCE], { seasonsReply: showReply(1, 2022) })
+      renderAt('/tabs/home')
+      await searchFor('severance')
+      await pickResult(/Severance/)
+      await waitFor(() => expect(seasonsShown()).toHaveTextContent('1'))
+
+      expect(releaseYearShown()).toHaveTextContent(/^2022$/)
+    })
+
+    it('keeps the end year when no season has aired', async () => {
+      const fetchStub = stubSearchResults([SEVERANCE], { seasonsReply: showReply(0, 2025) })
+
+      renderAt('/tabs/home')
+      await searchFor('severance')
+      await pickResult(/Severance/)
+      await waitFor(() => expect(seasonsCalls(fetchStub)).toHaveLength(1))
+      await waitFor(() => expect(releaseYearShown()).toHaveTextContent('2022–2025'))
+
+      expect(seasonsShown()).toHaveTextContent('—')
+
+      await save()
+
+      const [saved] = await savedEntries()
+
+      expect(saved.endYear).toBe(2025)
+      expect(saved.seasons).toBeUndefined()
+    })
+
+    it('shows only the start year after switching to a type that keeps no end year', async () => {
+      stubSearchResults([SEVERANCE], { seasonsReply: showReply(3, 2025) })
+      renderAt('/tabs/home')
+      await searchFor('severance')
+      await pickResult(/Severance/)
+      await waitFor(() => expect(releaseYearShown()).toHaveTextContent('2022–2025'))
+
+      fireEvent.change(screen.getByLabelText('סוג'), { target: { value: 'movie' } })
+
+      expect(releaseYearShown()).toHaveTextContent(/^2022$/)
+    })
+
+    it('shows the years a saved show ran when it is edited', async () => {
+      await db.entries.add(entry({ title: 'Breaking Bad', type: 'series', releaseYear: 2008, endYear: 2013 }))
+      stubSearchResults([])
+      renderAt('/tabs/home/series')
+      await pickResult(/Breaking Bad/)
+      await screen.findByText('שמירה')
+
+      expect(releaseYearShown()).toHaveTextContent('2008–2013')
+    })
   })
 
   describe('after the count is filled in', () => {

@@ -57,6 +57,23 @@
   font-size: 0.9375rem;
 }
 
+.more-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: var(--app-radius-card);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.more-details-row svg {
+  color: var(--app-accent);
+}
+
 .duplicate-hint {
   display: flex;
   align-items: center;

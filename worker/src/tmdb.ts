@@ -2,8 +2,9 @@ import { array, type InferOutput, nullish, number, object, string } from 'valibo
 import type { Env, SearchResult } from './types'
 import { isUsableTitle, parseUpstreamJson } from './upstream'
 
-const SEARCH_URL = 'https://api.themoviedb.org/3/search/multi'
-const TV_URL = 'https://api.themoviedb.org/3/tv'
+export const TMDB_URL = 'https://api.themoviedb.org/3'
+const SEARCH_URL = `${TMDB_URL}/search/multi`
+const TV_URL = `${TMDB_URL}/tv`
 const POSTER_URL = 'https://image.tmdb.org/t/p/w342'
 const MAX_RESULTS = 8
 const MOVIE_MEDIA_TYPE = 'movie'
@@ -14,6 +15,7 @@ const LEADING_YEAR = /^\d{4}/
 const FULL_DATE = /^\d{4}-\d{2}-\d{2}$/
 const ISO_DATE_LENGTH = 10
 const FIRST_REGULAR_SEASON = 1
+const FINISHED_STATUSES: readonly string[] = ['Ended', 'Canceled']
 const FIXED_SEARCH_PARAMS = { include_adult: 'false', language: 'en-US', page: '1' }
 
 const entrySchema = object({
@@ -31,9 +33,15 @@ const entrySchema = object({
 const responseSchema = object({ results: array(entrySchema) })
 
 const seasonSchema = object({ season_number: number(), air_date: nullish(string()) })
-const tvDetailsSchema = object({ seasons: nullish(array(seasonSchema), []) })
+const tvDetailsSchema = object({
+  seasons: nullish(array(seasonSchema), []),
+  status: nullish(string()),
+  last_air_date: nullish(string()),
+})
 
 type TmdbSeason = InferOutput<typeof seasonSchema>
+
+type SeasonFacts = { seasons: number; endYear?: number }
 
 type TmdbEntry = InferOutput<typeof entrySchema>
 
@@ -54,7 +62,7 @@ function yearOf(date: string | null | undefined) {
   return leadingYear ? Number(leadingYear[0]) : undefined
 }
 
-function isFullDate(date: string | null | undefined): date is string {
+export function isFullDate(date: string | null | undefined): date is string {
   return typeof date === 'string' && FULL_DATE.test(date)
 }
 
@@ -83,7 +91,11 @@ function toSearchResults(entry: TmdbEntry): SearchResult[] {
   ]
 }
 
-function authorizedHeaders(env: Env) {
+function isFinishedStatus(status: string | null | undefined) {
+  return typeof status === 'string' && FINISHED_STATUSES.includes(status)
+}
+
+export function authorizedHeaders(env: Env) {
   if (!env.TMDB_TOKEN) {
     throw new Error('TMDB_TOKEN is not set')
   }
@@ -103,11 +115,13 @@ export async function searchTmdb(query: string, env: Env): Promise<SearchResult[
   return results.filter(isMovieOrTv).flatMap(toSearchResults).slice(0, MAX_RESULTS)
 }
 
-export async function tmdbAiredSeasons(tvId: string, env: Env): Promise<number> {
+export async function tmdbSeasonFacts(tvId: string, env: Env): Promise<SeasonFacts> {
   const headers = authorizedHeaders(env)
   const response = await fetch(`${TV_URL}/${tvId}`, { headers })
-  const { seasons } = await parseUpstreamJson(response, tvDetailsSchema)
+  const { seasons, status, last_air_date } = await parseUpstreamJson(response, tvDetailsSchema)
   const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH)
+  const airedSeasons = seasons.filter((season) => hasAiredRegularSeason(season, today)).length
+  const endYear = isFinishedStatus(status) ? yearOf(last_air_date) : undefined
 
-  return seasons.filter((season) => hasAiredRegularSeason(season, today)).length
+  return { seasons: airedSeasons, endYear }
 }

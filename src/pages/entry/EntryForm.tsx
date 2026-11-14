@@ -1,20 +1,24 @@
 import { IonButton, IonContent, useIonAlert } from '@ionic/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Segmented, TextAreaField } from '../../components/formFields'
-import { Poster } from '../../components/Poster'
 import { SheetHeader } from '../../components/SheetHeader'
 import { useMessageToast } from '../../components/useMessageToast'
 import { COMMON_COPY } from '../../copy/common'
-import { MEDIA_TYPE_SINGULAR_LABELS, STATUS_LABELS } from '../../copy/labels'
+import { STATUS_LABELS } from '../../copy/labels'
 import { useAllEntries } from '../../data/hooks'
 import { addEntry, deleteEntry, updateEntry } from '../../data/repo'
 import { findExisting } from '../../domain/entries'
 import { todayIso } from '../../domain/finishDate'
-import { type Entry, isMediaType, isShowType, MEDIA_TYPES, STATUSES } from '../../domain/types'
+import { type Entry, isShowType, STATUSES } from '../../domain/types'
+import { tmdbTitleId } from '../../search/client'
+import { TitleDetailsPage } from '../details/TitleDetailsPage'
 import { ENTRY_COPY } from './copy'
 import { DateFields, RatingPills, SeasonStepper } from './formFields'
+import { FormIdentity } from './FormIdentity'
 import { dateProblem, draftFromForm, type EntryFormState } from './formState'
-import { useSeasonPrefill } from './useSeasonPrefill'
+import { MoreDetailsRow } from './MoreDetailsRow'
+import { useShowPrefill } from './useShowPrefill'
 import './entryForm.css'
 
 type EntryFormProps = {
@@ -28,6 +32,8 @@ type EntryFormProps = {
 export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClose }: EntryFormProps) {
   const [form, setForm] = useState(initial)
   const [isSaving, setIsSaving] = useState(false)
+  const [showingDetails, setShowingDetails] = useState(false)
+  const moreDetailsRow = useRef<HTMLButtonElement>(null)
   const [presentAlert] = useIonAlert()
   const toast = useMessageToast()
   const entries = useAllEntries()
@@ -38,9 +44,15 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
   const problem = dateProblem(form, today)
   const hasTitle = form.title.trim() !== ''
   const duplicate = !editing && !isSaving && hasTitle ? findExisting(entries ?? [], form) : undefined
+  const detailsTitleId = tmdbTitleId(form)
+  const sheetTitle = editing ? ENTRY_COPY.editTitle : COMMON_COPY.addTitle
 
-  useSeasonPrefill(seasonsTvId, (seasons) =>
-    setForm((current) => (current.seasons === undefined ? { ...current, seasons } : current)),
+  useShowPrefill(seasonsTvId, ({ seasons, endYear }) =>
+    setForm((current) => ({
+      ...current,
+      seasons: current.seasons === undefined && seasons > 0 ? seasons : current.seasons,
+      endYear: endYear ?? current.endYear,
+    })),
   )
 
   async function save() {
@@ -55,6 +67,11 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
       setIsSaving(false)
       void toast(COMMON_COPY.actionFailed)
     }
+  }
+
+  function closeDetails() {
+    flushSync(() => setShowingDetails(false))
+    moreDetailsRow.current?.focus()
   }
 
   function confirmDelete(entry: Entry) {
@@ -74,123 +91,102 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
 
   return (
     <>
-      <SheetHeader title={editing ? ENTRY_COPY.editTitle : COMMON_COPY.addTitle} onClose={onClose}>
-        <IonButton
-          className="save-button"
-          fill="solid"
-          shape="round"
-          disabled={!hasTitle || Boolean(problem) || isSaving}
-          onClick={() => void save()}
-        >
-          {ENTRY_COPY.save}
-        </IonButton>
-      </SheetHeader>
-      <IonContent>
-        <form className="sheet-body" onSubmit={(event) => event.preventDefault()}>
-          <div className="form-identity">
-            <div className="form-identity-poster">
-              <Poster title={form.title} posterUrl={form.posterUrl} compact />
-            </div>
-            <div className="form-identity-inputs">
-              <label>
-                <span className="visually-hidden">{ENTRY_COPY.titleField}</span>
-                <input
-                  className="title-input"
-                  dir="auto"
-                  placeholder={ENTRY_COPY.titleField}
-                  value={form.title}
-                  onChange={(event) => change({ title: event.target.value })}
-                />
-              </label>
-              <div className="form-identity-meta">
-                <label>
-                  <span className="visually-hidden">{ENTRY_COPY.typeField}</span>
-                  <select
-                    className="type-select"
-                    value={form.type}
-                    onChange={(event) => isMediaType(event.target.value) && change({ type: event.target.value })}
-                  >
-                    {MEDIA_TYPES.map((type) => (
-                      <option key={type} value={type}>
-                        {MEDIA_TYPE_SINGULAR_LABELS[type]}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {form.releaseYear && <span className="release-year">{form.releaseYear}</span>}
-              </div>
-            </div>
-          </div>
+      <div className="ion-page" inert={showingDetails}>
+        <SheetHeader title={sheetTitle} onClose={onClose}>
+          <IonButton
+            className="save-button"
+            fill="solid"
+            shape="round"
+            disabled={!hasTitle || Boolean(problem) || isSaving}
+            onClick={() => void save()}
+          >
+            {ENTRY_COPY.save}
+          </IonButton>
+        </SheetHeader>
+        <IonContent>
+          <form className="sheet-body" onSubmit={(event) => event.preventDefault()}>
+            <FormIdentity form={form} onChange={change} />
 
-          {duplicate && (
-            <p className="duplicate-hint">
-              {ENTRY_COPY.duplicateTitle}
-              <button type="button" onClick={() => onOpenExisting(duplicate)}>
-                {ENTRY_COPY.openExisting}
-              </button>
-            </p>
-          )}
+            {detailsTitleId && <MoreDetailsRow ref={moreDetailsRow} onOpen={() => setShowingDetails(true)} />}
 
-          <Segmented
-            label={ENTRY_COPY.statusField}
-            options={STATUSES}
-            labels={STATUS_LABELS}
-            selected={form.status}
-            onSelect={(status) => change({ status })}
-          />
+            {duplicate && (
+              <p className="duplicate-hint">
+                {ENTRY_COPY.duplicateTitle}
+                <button type="button" onClick={() => onOpenExisting(duplicate)}>
+                  {ENTRY_COPY.openExisting}
+                </button>
+              </p>
+            )}
 
-          {isStopped && isShow && (
-            <SeasonStepper
-              label={ENTRY_COPY.stoppedAtSeason}
-              season={form.stoppedSeason}
-              onChange={(stoppedSeason) => change({ stoppedSeason })}
+            <Segmented
+              label={ENTRY_COPY.statusField}
+              options={STATUSES}
+              labels={STATUS_LABELS}
+              selected={form.status}
+              onSelect={(status) => change({ status })}
             />
-          )}
 
-          {isStopped && (
+            {isStopped && isShow && (
+              <SeasonStepper
+                label={ENTRY_COPY.stoppedAtSeason}
+                season={form.stoppedSeason}
+                onChange={(stoppedSeason) => change({ stoppedSeason })}
+              />
+            )}
+
+            {isStopped && (
+              <TextAreaField
+                label={ENTRY_COPY.whyStopped}
+                text={form.stopReason}
+                onChange={(stopReason) => change({ stopReason })}
+              />
+            )}
+
+            <RatingPills
+              legend={isStopped ? ENTRY_COPY.howWasItUntilThen : ENTRY_COPY.howWasIt}
+              selected={form.rating}
+              onSelect={(rating) => change({ rating })}
+            />
+
+            {!isStopped && isShow && (
+              <SeasonStepper
+                label={ENTRY_COPY.seasonsWatched}
+                season={form.seasons}
+                onChange={(seasons) => change({ seasons })}
+              />
+            )}
+
+            <DateFields
+              legend={isStopped ? ENTRY_COPY.whenStopped : ENTRY_COPY.whenFinished}
+              form={form}
+              today={today}
+              problem={problem}
+              onChange={change}
+            />
+
             <TextAreaField
-              label={ENTRY_COPY.whyStopped}
-              text={form.stopReason}
-              onChange={(stopReason) => change({ stopReason })}
+              label={ENTRY_COPY.note}
+              text={form.note}
+              placeholder={ENTRY_COPY.notePlaceholder}
+              onChange={(note) => change({ note })}
             />
-          )}
 
-          <RatingPills
-            legend={isStopped ? ENTRY_COPY.howWasItUntilThen : ENTRY_COPY.howWasIt}
-            selected={form.rating}
-            onSelect={(rating) => change({ rating })}
-          />
-
-          {!isStopped && isShow && (
-            <SeasonStepper
-              label={ENTRY_COPY.seasonsWatched}
-              season={form.seasons}
-              onChange={(seasons) => change({ seasons })}
-            />
-          )}
-
-          <DateFields
-            legend={isStopped ? ENTRY_COPY.whenStopped : ENTRY_COPY.whenFinished}
-            form={form}
-            today={today}
-            problem={problem}
-            onChange={change}
-          />
-
-          <TextAreaField
-            label={ENTRY_COPY.note}
-            text={form.note}
-            placeholder={ENTRY_COPY.notePlaceholder}
-            onChange={(note) => change({ note })}
-          />
-
-          {editing && (
-            <button type="button" className="delete-entry" onClick={() => confirmDelete(editing)}>
-              {ENTRY_COPY.deleteTitle}
-            </button>
-          )}
-        </form>
-      </IonContent>
+            {editing && (
+              <button type="button" className="delete-entry" onClick={() => confirmDelete(editing)}>
+                {ENTRY_COPY.deleteTitle}
+              </button>
+            )}
+          </form>
+        </IonContent>
+      </div>
+      {showingDetails && detailsTitleId && (
+        <TitleDetailsPage
+          titleId={detailsTitleId}
+          identity={form}
+          backLabel={sheetTitle}
+          onBack={closeDetails}
+        />
+      )}
     </>
   )
 }

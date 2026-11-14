@@ -123,6 +123,7 @@ export function normalizeEntry(entry: Entry): Entry {
     ...entry,
     title: entry.title.trim(),
     note: withoutBlankText(entry.note),
+    endYear: isShow ? entry.endYear : undefined,
     seasons: isShow && !isStopped ? entry.seasons : undefined,
     stoppedSeason: isShow && isStopped ? entry.stoppedSeason : undefined,
     stopReason: isStopped ? withoutBlankText(entry.stopReason) : undefined,

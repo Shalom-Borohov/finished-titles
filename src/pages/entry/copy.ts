@@ -41,4 +41,5 @@ export const ENTRY_COPY = {
   deleteQuestion: 'למחוק את הכותר?',
   deleteWarning: 'אי אפשר לבטל את זה.',
   deleteConfirm: 'מחיקה',
+  moreDetails: 'פרטים נוספים',
 } as const

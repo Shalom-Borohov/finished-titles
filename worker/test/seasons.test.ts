@@ -106,6 +106,37 @@ describe('aired seasons', () => {
   })
 })
 
+describe('series end year', () => {
+  async function seasonFactsOf(details: object) {
+    freezeToday()
+    stubTmdb(() => Response.json({ id: 1396, seasons: [{ season_number: 1, air_date: '2008-01-20' }], ...details }))
+
+    const response = await seasonsOf('1396')
+
+    return response.json()
+  }
+
+  it.each([
+    ['Ended', { status: 'Ended', last_air_date: '2013-09-29' }, { seasons: 1, endYear: 2013 }],
+    ['Canceled', { status: 'Canceled', last_air_date: '2011-05-04' }, { seasons: 1, endYear: 2011 }],
+  ])('answers the year of the last air date when the show is %s', async (_description, details, expected) => {
+    expect(await seasonFactsOf(details)).toEqual(expected)
+  })
+
+  it.each([
+    ['still returning', { status: 'Returning Series', last_air_date: '2026-10-01' }],
+    ['in production', { status: 'In Production', last_air_date: '2026-10-01' }],
+    ['without a status', { last_air_date: '2013-09-29' }],
+    ['with a null status', { status: null, last_air_date: '2013-09-29' }],
+    ['ended with a null last air date', { status: 'Ended', last_air_date: null }],
+    ['ended without a last air date', { status: 'Ended' }],
+    ['ended with an empty last air date', { status: 'Ended', last_air_date: '' }],
+    ['ended with a last air date that has no year', { status: 'Ended', last_air_date: 'soon' }],
+  ])('leaves the end year out when the show is %s', async (_description, details) => {
+    expect(await seasonFactsOf(details)).toEqual({ seasons: 1 })
+  })
+})
+
 describe('TMDB failures', () => {
   it.each([
     ['an unauthorized status', () => new Response('nope', { status: 401 })],

@@ -48,6 +48,7 @@ export const entrySchema = object({
   status: picklist(STATUSES),
   createdAt: number(),
   releaseYear: optional(number()),
+  endYear: optional(pipe(number(), integer())),
   posterUrl: optional(posterUrlSchema),
   source: optional(picklist(SEARCH_SOURCES)),
   sourceId: optional(string()),

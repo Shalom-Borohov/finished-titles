@@ -1,9 +1,12 @@
 import {
   array,
+  check,
+  fallback,
   filterItems,
   type InferOutput,
   integer,
   is,
+  isoDate,
   minValue,
   number,
   object,
@@ -15,6 +18,7 @@ import {
   string,
   unknown,
 } from 'valibot'
+import { isFinishDate } from '../domain/finishDate'
 import { posterUrlSchema, SEARCH_SOURCES, SEARCHABLE_TYPES } from '../domain/types'
 
 const searchResultSchema = object({
@@ -41,13 +45,39 @@ const searchResponseSchema = object({
   unavailable: array(string()),
 })
 
-const airedSeasonsSchema = object({ seasons: pipe(number(), integer(), minValue(0)) })
+const showPrefillSchema = object({
+  seasons: pipe(number(), integer(), minValue(0)),
+  endYear: optional(pipe(number(), integer())),
+})
 
-const TMDB_TV_ID = /^tv\/(\d+)$/
+const minutesSchema = pipe(number(), integer(), minValue(1))
+
+const namesSchema = optional(array(string()), [])
+
+const titleDetailsSchema = object({
+  originalTitle: optional(string()),
+  genres: optional(array(object({ id: number(), name: string() })), []),
+  creators: namesSchema,
+  cast: namesSchema,
+  networks: namesSchema,
+  episodes: optional(pipe(number(), integer(), minValue(1))),
+  episodeMinutes: optional(minutesSchema),
+  runtimeMinutes: optional(minutesSchema),
+  nextEpisodeDate: fallback(optional(pipe(string(), isoDate(), check(isFinishDate))), undefined),
+  watchInIsrael: namesSchema,
+})
+
+const TMDB_TITLE_ID = /^(tv|movie)\/(\d+)$/
+
+const TMDB_SHOW_KIND = 'tv'
 
 export type SearchResponse = InferOutput<typeof searchResponseSchema>
 
 export type SearchResult = SearchResponse['results'][number]
+
+export type ShowPrefill = InferOutput<typeof showPrefillSchema>
+
+export type TitleDetails = InferOutput<typeof titleDetailsSchema>
 
 async function fetchFromSearchService(path: string, signal: AbortSignal): Promise<unknown> {
   const baseUrl: string | undefined = import.meta.env.VITE_SEARCH_URL
@@ -69,12 +99,28 @@ export async function searchTitles(query: string, signal: AbortSignal): Promise<
   return parse(searchResponseSchema, await fetchFromSearchService(`/search?q=${encodeURIComponent(query)}`, signal))
 }
 
+const tmdbTitleMatch = (titleId: string) => TMDB_TITLE_ID.exec(titleId)
+
+export const isTmdbShowId = (titleId: string) => tmdbTitleMatch(titleId)?.[1] === TMDB_SHOW_KIND
+
 export function tmdbTvId({ source, sourceId }: SearchResult) {
-  return source === 'tmdb' ? sourceId.match(TMDB_TV_ID)?.[1] : undefined
+  const match = tmdbTitleMatch(sourceId)
+
+  return source === 'tmdb' && match?.[1] === TMDB_SHOW_KIND ? match[2] : undefined
 }
 
-export async function fetchAiredSeasons(tvId: string, signal: AbortSignal): Promise<number> {
+export function tmdbTitleId({ source, sourceId }: Partial<Pick<SearchResult, 'source' | 'sourceId'>>) {
+  return source === 'tmdb' && sourceId && tmdbTitleMatch(sourceId) ? sourceId : undefined
+}
+
+export async function fetchShowPrefill(tvId: string, signal: AbortSignal): Promise<ShowPrefill> {
   const path = `/seasons?tv=${encodeURIComponent(tvId)}`
 
-  return parse(airedSeasonsSchema, await fetchFromSearchService(path, signal)).seasons
+  return parse(showPrefillSchema, await fetchFromSearchService(path, signal))
+}
+
+export async function fetchTitleDetails(titleId: string, signal: AbortSignal): Promise<TitleDetails> {
+  const path = `/details?title=${encodeURIComponent(titleId)}`
+
+  return parse(titleDetailsSchema, await fetchFromSearchService(path, signal))
 }
