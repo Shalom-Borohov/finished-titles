@@ -156,6 +156,13 @@ describe('normalizeEntry', () => {
     expect(normalizeEntry(entry({ type: 'book', status: 'stopped', stoppedSeason: 2 })).stoppedSeason).toBeUndefined()
   })
 
+  it('keeps the end year only for shows, finished or stopped', () => {
+    expect(normalizeEntry(entry({ type: 'series', endYear: 2013 })).endYear).toBe(2013)
+    expect(normalizeEntry(entry({ type: 'anime', status: 'stopped', endYear: 2013 })).endYear).toBe(2013)
+    expect(normalizeEntry(entry({ type: 'movie', endYear: 2013 })).endYear).toBeUndefined()
+    expect(normalizeEntry(entry({ type: 'book', endYear: 2013 })).endYear).toBeUndefined()
+  })
+
   it('keeps the reason only for stopped entries', () => {
     expect(normalizeEntry(entry({ status: 'stopped', stopReason: 'נמרח' })).stopReason).toBe('נמרח')
     expect(normalizeEntry(entry({ stopReason: 'נמרח' })).stopReason).toBeUndefined()

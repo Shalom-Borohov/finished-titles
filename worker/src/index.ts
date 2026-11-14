@@ -2,18 +2,22 @@ import { maxLength, minLength, pipe, regex, safeParse, string, trim } from 'vali
 import { corsHeaders, forbiddenResponse, isAllowedOrigin, preflightResponse } from './cors'
 import { searchIgdb } from './igdb'
 import { searchOpenLibrary } from './openLibrary'
-import { searchTmdb, tmdbAiredSeasons } from './tmdb'
+import { searchTmdb, tmdbSeasonFacts } from './tmdb'
+import { tmdbTitleDetails } from './tmdbDetails'
 import type { Env, SearchResponse } from './types'
 
 const SEARCH_PATH = '/search'
 const SEASONS_PATH = '/seasons'
+const DETAILS_PATH = '/details'
 const READ_METHOD = 'GET'
 const PREFLIGHT_METHOD = 'OPTIONS'
 const QUERY_PARAMETER = 'q'
 const TV_PARAMETER = 'tv'
+const TITLE_PARAMETER = 'title'
 const MIN_QUERY_LENGTH = 2
 const MAX_QUERY_LENGTH = 100
 const DIGITS_ONLY = /^\d+$/
+const TMDB_TITLE_REFERENCE = /^(tv|movie)\/\d+$/
 const SOURCE_DEADLINE_MS = 8000
 const BAD_REQUEST_STATUS = 400
 const NOT_FOUND_STATUS = 404
@@ -27,6 +31,7 @@ const SOURCES = [
 
 const querySchema = pipe(string(), trim(), minLength(MIN_QUERY_LENGTH), maxLength(MAX_QUERY_LENGTH))
 const tvIdSchema = pipe(string(), regex(DIGITS_ONLY))
+const titleSchema = pipe(string(), regex(TMDB_TITLE_REFERENCE))
 
 function rejectAtDeadline(): Promise<never> {
   return new Promise((_resolve, reject) => {
@@ -82,7 +87,21 @@ export default {
       }
 
       try {
-        return Response.json({ seasons: await tmdbAiredSeasons(tvId.output, env) }, { headers })
+        return Response.json(await tmdbSeasonFacts(tvId.output, env), { headers })
+      } catch {
+        return new Response(null, { status: BAD_GATEWAY_STATUS, headers })
+      }
+    }
+
+    if (url.pathname === DETAILS_PATH) {
+      const title = safeParse(titleSchema, url.searchParams.get(TITLE_PARAMETER))
+
+      if (!title.success) {
+        return new Response(null, { status: BAD_REQUEST_STATUS, headers })
+      }
+
+      try {
+        return Response.json(await tmdbTitleDetails(title.output, env), { headers })
       } catch {
         return new Response(null, { status: BAD_GATEWAY_STATUS, headers })
       }

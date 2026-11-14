@@ -2,6 +2,12 @@ import { vi } from 'vitest'
 
 export const SEARCH_URL = 'https://search.test'
 
+export const SEVERANCE = { source: 'tmdb', sourceId: 'tv/95396', title: 'Severance', type: 'series', year: 2022 } as const
+
+export const DUNE = { source: 'tmdb', sourceId: 'movie/438631', title: 'Dune', type: 'movie', year: 2021 } as const
+
+export const jsonReply = (body: object) => async () => Response.json(body)
+
 type StubResult = {
   source: string
   sourceId: string
@@ -14,18 +20,28 @@ type StubResult = {
 type StubOptions = {
   unavailable?: string[]
   seasonsReply?: () => Promise<Response>
+  detailsReply?: () => Promise<Response>
 }
 
 const SEASONS_URL = `${SEARCH_URL}/seasons`
 
-const seasonsNotFound = async () => new Response(null, { status: 404 })
+const DETAILS_URL = `${SEARCH_URL}/details`
 
-export function stubSearchResults(results: StubResult[], { unavailable = [], seasonsReply = seasonsNotFound }: StubOptions = {}) {
-  const fetchStub = vi
-    .fn<typeof fetch>()
-    .mockImplementation(async (input) =>
-      String(input).startsWith(SEASONS_URL) ? seasonsReply() : Response.json({ results, unavailable }),
-    )
+const notFound = async () => new Response(null, { status: 404 })
+
+export function stubSearchResults(
+  results: StubResult[],
+  { unavailable = [], seasonsReply = notFound, detailsReply = notFound }: StubOptions = {},
+) {
+  const fetchStub = vi.fn<typeof fetch>().mockImplementation(async (input) => {
+    const url = String(input)
+
+    if (url.startsWith(SEASONS_URL)) {
+      return seasonsReply()
+    }
+
+    return url.startsWith(DETAILS_URL) ? detailsReply() : Response.json({ results, unavailable })
+  })
 
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)
   vi.stubGlobal('fetch', fetchStub)
@@ -33,8 +49,12 @@ export function stubSearchResults(results: StubResult[], { unavailable = [], sea
   return fetchStub
 }
 
-export const seasonsCalls = (fetchStub: ReturnType<typeof stubSearchResults>) =>
-  fetchStub.mock.calls.map(([input]) => String(input)).filter((url) => url.startsWith(SEASONS_URL))
+const callsTo = (fetchStub: ReturnType<typeof stubSearchResults>, prefix: string) =>
+  fetchStub.mock.calls.map(([input]) => String(input)).filter((url) => url.startsWith(prefix))
+
+export const seasonsCalls = (fetchStub: ReturnType<typeof stubSearchResults>) => callsTo(fetchStub, SEASONS_URL)
+
+export const detailsCalls = (fetchStub: ReturnType<typeof stubSearchResults>) => callsTo(fetchStub, DETAILS_URL)
 
 export function stubSearchFailure() {
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)
