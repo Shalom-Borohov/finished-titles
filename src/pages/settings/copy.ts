@@ -1,3 +1,7 @@
+import { COMMON_COPY } from '../../copy/common'
+
+const BUILD_TIME_FORMAT = new Intl.DateTimeFormat('he-IL', { dateStyle: 'short', timeStyle: 'short' })
+
 export const SETTINGS_COPY = {
   backup: 'גיבוי',
   exportBackup: 'ייצוא גיבוי',
@@ -26,5 +30,6 @@ export const SETTINGS_COPY = {
   dataSources: 'מקורות',
   tmdbLogoAlt: 'TMDB',
   tmdbNotice: 'This application uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.',
-  version: (version: string) => `גרסה ${version}`,
+  version: (version: string, builtAt: string) =>
+    [`גרסה ${version}`, `עודכנה ${BUILD_TIME_FORMAT.format(new Date(builtAt))}`].join(COMMON_COPY.separator),
 } as const

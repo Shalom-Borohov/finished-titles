@@ -11,6 +11,10 @@ const NOW = new Date(2026, 10, 7, 9, 30).getTime()
 
 const dune = entry({ title: 'Dune', type: 'movie', finishedOn: '2024' })
 
+const versionLine = new RegExp(
+  `^גרסה ${__APP_VERSION__.replaceAll('.', '\\.')} · עודכנה \\d{1,2}\\.\\d{1,2}\\.\\d{4}, \\d{1,2}:\\d{2}$`,
+)
+
 const toasts = () => Array.from(document.querySelectorAll('ion-toast'), (toast) => toast.message)
 
 function chooseFile(text: string) {
@@ -99,10 +103,10 @@ describe('settings', () => {
     expect(screen.getByRole('img', { name: 'TMDB' })).toBeVisible()
   })
 
-  it('shows the running version', async () => {
+  it('shows the running version with its build time', async () => {
     renderAt('/tabs/settings')
 
-    expect(await screen.findByText(/^גרסה \d+\.\d+\.\d+$/)).toBeVisible()
+    expect(await screen.findByText(versionLine)).toBeVisible()
   })
 
   it('opens a GitHub bug report on finished-titles with the text and device details', async () => {

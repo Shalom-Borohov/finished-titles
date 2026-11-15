@@ -90,7 +90,7 @@ export function SettingsPage() {
             </p>
           </section>
 
-          <p className="settings-version">{SETTINGS_COPY.version(__APP_VERSION__)}</p>
+          <p className="settings-version">{SETTINGS_COPY.version(__APP_VERSION__, __APP_BUILT_AT__)}</p>
 
           <input
             ref={fileInput}
