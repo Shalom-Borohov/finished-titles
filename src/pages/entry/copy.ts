@@ -42,4 +42,6 @@ export const ENTRY_COPY = {
   deleteWarning: 'אי אפשר לבטל את זה.',
   deleteConfirm: 'מחיקה',
   moreDetails: 'פרטים נוספים',
+  genres: 'ז׳אנרים',
+  noGenres: 'לא נבחרו',
 } as const

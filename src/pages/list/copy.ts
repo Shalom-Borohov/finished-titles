@@ -6,6 +6,10 @@ export const LIST_COPY = {
   all: 'הכל',
   finished: (count: number) => `סיימתי ${count}`,
   stopped: (count: number) => `עצרתי ${count}`,
+  ratingFilter: 'סינון לפי דירוג',
+  allRatings: 'כל הדירוגים',
+  genreFilter: 'סינון לפי ז׳אנר',
+  allGenres: 'כל הז׳אנרים',
   emptyType: 'עדיין אין כאן כותרים',
   noMatches: 'לא נמצאו כותרים',
 } as const

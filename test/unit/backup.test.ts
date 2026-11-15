@@ -25,6 +25,31 @@ describe('backup', () => {
     expect(await allEntries()).toEqual(before)
   })
 
+  it('keeps genres through a round trip, including an empty list', async () => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', genres: ['scifi', 'drama'] }, NOW)
+    await addEntry({ title: 'Cleared', type: 'book', status: 'stopped', genres: [] }, NOW)
+
+    const before = await allEntries()
+    const text = JSON.stringify(await exportBackup(NOW))
+
+    await resetDb()
+    await restoreBackup(parseBackup(text))
+
+    const restored = await allEntries()
+
+    expect(restored).toEqual(before)
+    expect(restored.map(({ genres }) => genres)).toEqual(expect.arrayContaining([['scifi', 'drama'], []]))
+  })
+
+  it('restores an old backup that has no genres, leaving them unset', async () => {
+    await restoreBackup(parseBackup(backupText([{ id: 'a', title: 'Dune', type: 'movie', status: 'finished', createdAt: NOW, source: 'tmdb', sourceId: 'movie/438631' }])))
+
+    const [restored] = await allEntries()
+
+    expect(restored.title).toBe('Dune')
+    expect(restored.genres).toBeUndefined()
+  })
+
   it('records when it was exported, and keeps poster links but no images', async () => {
     await addEntry({ title: 'Dune', type: 'movie', status: 'finished', posterUrl: 'https://image.tmdb.org/t/p/w342/dune.jpg' }, NOW)
 
@@ -55,6 +80,7 @@ describe('backup', () => {
     ['an unknown type', backupText([{ id: 'a', title: 'x', type: 'podcast', status: 'finished', createdAt: NOW }])],
     ['a bad finish date', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, finishedOn: 'soon' }])],
     ['a blank title', backupText([{ id: 'a', title: '  ', type: 'movie', status: 'finished', createdAt: NOW }])],
+    ['an unknown genre', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, genres: ['Drama'] }])],
   ])('rejects %s', (_name, text) => {
     expect(() => parseBackup(text)).toThrow()
   })

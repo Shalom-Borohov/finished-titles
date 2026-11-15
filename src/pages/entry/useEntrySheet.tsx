@@ -4,6 +4,7 @@ import { ALL_TYPES, type TypeFilter } from '../../domain/entries'
 import { todayIso } from '../../domain/finishDate'
 import { type Entry, isSearchableType, type MediaType } from '../../domain/types'
 import { type SearchResult, tmdbTvId } from '../../search/client'
+import { genresFromTmdb } from '../../search/tmdbGenres'
 import { EntryForm } from './EntryForm'
 import { type EntryFormState, formFromDraft, formFromEntry } from './formState'
 import { SearchStep } from './SearchStep'
@@ -13,8 +14,10 @@ const DEFAULT_MANUAL_TYPE: MediaType = 'movie'
 
 type SheetStep = { kind: 'search' } | { kind: 'form'; initial: EntryFormState; editing?: Entry; seasonsTvId?: string }
 
-function formFromResult({ title, type, year, posterUrl, source, sourceId }: SearchResult) {
-  return formFromDraft({ title, type, releaseYear: year, posterUrl, source, sourceId, status: 'finished' }, todayIso())
+function formFromResult({ title, type, year, posterUrl, source, sourceId, genreIds }: SearchResult) {
+  const genres = genreIds && genresFromTmdb(genreIds)
+
+  return formFromDraft({ title, type, releaseYear: year, posterUrl, source, sourceId, genres, status: 'finished' }, todayIso())
 }
 
 export function useEntrySheet(listType: TypeFilter) {

@@ -22,6 +22,49 @@
   margin-block: 10px 14px;
 }
 
+.status-pills:has(+ .menu-pills) {
+  margin-bottom: 6px;
+}
+
+.menu-pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.menu-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline-end: 10px;
+}
+
+.menu-pill:has(.menu-pill-select:focus-visible) {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+.menu-pill-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+}
+
+.menu-pill-chevron {
+  opacity: 0.6;
+}
+
+.pill-chosen .menu-pill-chevron {
+  opacity: 0.85;
+}
+
 .list-empty {
   margin: 40px 0;
   color: var(--app-ink-soft);

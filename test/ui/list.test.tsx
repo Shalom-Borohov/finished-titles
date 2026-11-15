@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../src/data/db'
 import { resetDb } from '../helpers/db'
@@ -30,7 +30,7 @@ describe('type list', () => {
     ])
     renderAt('/tabs/home/anime')
 
-    expect(await screen.findByText('אהוב במיוחד')).toBeVisible()
+    expect(within(await screen.findByRole('button', { name: /Frieren/ })).getByText('אהוב במיוחד')).toBeVisible()
     expect(screen.getByText('נעצר בעונה 3')).toBeVisible()
   })
 

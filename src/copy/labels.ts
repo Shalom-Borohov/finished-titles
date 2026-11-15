@@ -1,4 +1,4 @@
-import type { MediaType, Rating, Status } from '../domain/types'
+import type { Genre, MediaType, Rating, Status } from '../domain/types'
 
 export const MEDIA_TYPE_LABELS: Record<MediaType, string> = {
   anime: 'אנימה',
@@ -26,6 +26,30 @@ export const RATING_LABELS: Record<Rating, string> = {
   liked: 'אהבתי',
   okay: 'היה בסדר',
   disliked: 'לא אהבתי',
+}
+
+export const GENRE_LABELS: Record<Genre, string> = {
+  horror: 'אימה',
+  animation: 'אנימציה',
+  action: 'אקשן',
+  drama: 'דרמה',
+  history: 'היסטוריה',
+  adventure: 'הרפתקאות',
+  kids: 'ילדים',
+  scifi: 'מדע בדיוני',
+  music: 'מוזיקה',
+  thriller: 'מותחן',
+  war: 'מלחמה',
+  mystery: 'מסתורין',
+  western: 'מערבון',
+  family: 'משפחה',
+  politics: 'פוליטיקה',
+  fantasy: 'פנטזיה',
+  crime: 'פשע',
+  comedy: 'קומדיה',
+  reality: 'ריאליטי',
+  romance: 'רומנטיקה',
+  documentary: 'תיעודי',
 }
 
 export const STATUS_LABELS: Record<Status, string> = {

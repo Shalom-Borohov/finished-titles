@@ -7,6 +7,7 @@ import { type Backup, exportBackup, parseBackup, restoreBackup } from '../../dat
 import { BACKUP_FILE_ACCEPT, shareBackup } from './backupFile'
 import { SETTINGS_COPY } from './copy'
 import { FeedbackSettings } from './FeedbackSettings'
+import { GenreFillSettings } from './GenreFillSettings'
 import './settings.css'
 
 const TMDB_LOGO_PATH = `${import.meta.env.BASE_URL}tmdb-logo.svg`
@@ -79,6 +80,8 @@ export function SettingsPage() {
             </button>
             <p className="settings-note">{SETTINGS_COPY.storageNote}</p>
           </section>
+
+          <GenreFillSettings />
 
           <FeedbackSettings />
 

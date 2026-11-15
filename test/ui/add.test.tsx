@@ -5,6 +5,7 @@ import { openAdd, pickResult, pressButton, save, savedEntries, searchFor } from 
 import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
+import { expectInOrder } from '../helpers/ionic'
 import { renderAt } from '../helpers/renderAt'
 import { SEARCH_URL, stubSearchFailure, stubSearchResults } from '../helpers/searchService'
 
@@ -356,6 +357,7 @@ describe('adding a title', () => {
 
     expect(await screen.findByText('כותר בשם הזה כבר ברשימה')).toBeVisible()
     expect(await saveButton()).toHaveProperty('disabled', false)
+    await expectInOrder(['כותר בשם הזה כבר ברשימה', 'ז׳אנרים'])
   })
 
   it('says when search is unavailable and still allows manual entry', async () => {

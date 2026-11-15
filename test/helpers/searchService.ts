@@ -15,12 +15,13 @@ type StubResult = {
   type?: string
   year?: number
   posterUrl?: string
+  genreIds?: number[]
 }
 
 type StubOptions = {
   unavailable?: string[]
   seasonsReply?: () => Promise<Response>
-  detailsReply?: () => Promise<Response>
+  detailsReply?: (url: string) => Promise<Response>
 }
 
 const SEASONS_URL = `${SEARCH_URL}/seasons`
@@ -40,7 +41,7 @@ export function stubSearchResults(
       return seasonsReply()
     }
 
-    return url.startsWith(DETAILS_URL) ? detailsReply() : Response.json({ results, unavailable })
+    return url.startsWith(DETAILS_URL) ? detailsReply(url) : Response.json({ results, unavailable })
   })
 
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)
