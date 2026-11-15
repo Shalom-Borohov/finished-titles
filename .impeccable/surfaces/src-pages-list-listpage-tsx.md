@@ -7,7 +7,7 @@ related_targets: ["src/pages/entry/EntryForm.tsx","src/pages/settings/SettingsPa
 
 Scope: issue #21's additions to three existing screens: the list's rating and genre filters, the form's genre field, and the Settings genre fill. Mode: Operate. This extends the world in the app brief (`src/App.tsx`); DESIGN.md is unchanged.
 
-Audience and job: the owner browsing a list wants every אהוב במיוחד, or every title of one genre, without the filters crowding the posters. Constraints: one rating and one genre at a time (spec 68, 70), only values the list has, 44pt targets, Hebrew RTL.
+Audience and job: the owner browsing a list wants every אהוב במיוחד, or every title of one genre, without the filters crowding the posters. Constraints: one rating and one genre at a time (spec 73, 75), only values the list has, 44pt targets, Hebrew RTL.
 
 Chosen direction: picked by the owner on the decision page on 2026-11-15, one round per screen, each from three sketches ranked by the designer rather than dealt. Approved sketches: `.impeccable/mocks/decision/filters-menus.html`, `genres-inplace.html`, `fill-card.html`.
 
