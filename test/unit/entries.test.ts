@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { filterEntries, findExisting, homeTiles, normalizeEntry, sortNewestFirst, verdictLabel } from '../../src/domain/entries'
+import {
+  awaitingGenres,
+  filterEntries,
+  findExisting,
+  homeTiles,
+  normalizeEntry,
+  offeredGenres,
+  offeredRatings,
+  sortNewestFirst,
+  verdictLabel,
+} from '../../src/domain/entries'
 import { entry } from '../helpers/entries'
 
 const titles = (entries: { title: string }[]) => entries.map(({ title }) => title)
@@ -76,6 +86,68 @@ describe('filterEntries', () => {
 
   it('can span every type', () => {
     expect(titles(filterEntries(entries, { type: 'all', status: 'all', query: 'd' }))).toEqual(['Dune', 'Dark'])
+  })
+})
+
+describe('filterEntries by rating and genre', () => {
+  const entries = [
+    entry({ title: 'Dune', rating: 'favorite', genres: ['scifi', 'drama'] }),
+    entry({ title: 'Lost', rating: 'favorite', status: 'stopped', genres: ['drama', 'mystery'] }),
+    entry({ title: 'Dark', rating: 'loved', genres: ['scifi'] }),
+    entry({ title: 'Diner', rating: 'liked' }),
+  ]
+
+  const everything = { type: 'all', status: 'all', query: '' } as const
+
+  it('keeps the exact rating word, stopped titles included', () => {
+    expect(titles(filterEntries(entries, { ...everything, rating: 'favorite' }))).toEqual(['Dune', 'Lost'])
+  })
+
+  it('keeps titles that have the genre among theirs', () => {
+    expect(titles(filterEntries(entries, { ...everything, genre: 'scifi' }))).toEqual(['Dune', 'Dark'])
+  })
+
+  it('combines rating and genre with status and search', () => {
+    expect(titles(filterEntries(entries, { ...everything, rating: 'favorite', genre: 'drama' }))).toEqual(['Dune', 'Lost'])
+    expect(titles(filterEntries(entries, { ...everything, status: 'stopped', genre: 'drama' }))).toEqual(['Lost'])
+    expect(titles(filterEntries(entries, { ...everything, query: 'da', genre: 'scifi' }))).toEqual(['Dark'])
+    expect(titles(filterEntries(entries, { ...everything, rating: 'loved', genre: 'drama' }))).toEqual([])
+  })
+})
+
+describe('offeredRatings and offeredGenres', () => {
+  const entries = [
+    entry({ rating: 'okay', genres: ['western', 'action'] }),
+    entry({ rating: 'favorite', status: 'stopped', genres: [] }),
+    entry({ rating: 'okay', genres: ['action', 'horror'] }),
+    entry({}),
+  ]
+
+  it('offers only the ratings some title has, in rating order', () => {
+    expect(offeredRatings(entries)).toEqual(['favorite', 'okay'])
+  })
+
+  it('offers only the genres some title has, in genre order', () => {
+    expect(offeredGenres(entries)).toEqual(['horror', 'action', 'western'])
+  })
+
+  it('offers nothing for titles without ratings or genres', () => {
+    expect(offeredRatings([entry({})])).toEqual([])
+    expect(offeredGenres([entry({ genres: [] })])).toEqual([])
+  })
+})
+
+describe('awaitingGenres', () => {
+  it('lists TMDB titles whose genres were never set', () => {
+    const entries = [
+      entry({ title: 'Waiting', source: 'tmdb', sourceId: 'movie/1' }),
+      entry({ title: 'Cleared', source: 'tmdb', sourceId: 'movie/2', genres: [] }),
+      entry({ title: 'Tagged', source: 'tmdb', sourceId: 'movie/3', genres: ['drama'] }),
+      entry({ title: 'Manual' }),
+      entry({ title: 'Book', type: 'book', source: 'openlibrary', sourceId: '/works/OL1W' }),
+    ]
+
+    expect(titles(awaitingGenres(entries))).toEqual(['Waiting'])
   })
 })
 
@@ -166,5 +238,11 @@ describe('normalizeEntry', () => {
   it('keeps the reason only for stopped entries', () => {
     expect(normalizeEntry(entry({ status: 'stopped', stopReason: 'נמרח' })).stopReason).toBe('נמרח')
     expect(normalizeEntry(entry({ stopReason: 'נמרח' })).stopReason).toBeUndefined()
+  })
+
+  it('keeps genres whatever the type or status, an empty list included', () => {
+    expect(normalizeEntry(entry({ type: 'book', status: 'stopped', genres: ['drama'] })).genres).toEqual(['drama'])
+    expect(normalizeEntry(entry({ type: 'series', genres: [] })).genres).toEqual([])
+    expect(normalizeEntry(entry({})).genres).toBeUndefined()
   })
 })

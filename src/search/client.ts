@@ -28,6 +28,7 @@ const searchResultSchema = object({
   type: picklist(SEARCHABLE_TYPES),
   year: optional(number()),
   posterUrl: optional(posterUrlSchema),
+  genreIds: optional(array(number())),
 })
 
 const kindSchema = object({ source: string(), type: string() })

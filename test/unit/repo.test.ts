@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addEntry, allEntries, deleteEntry, updateEntry } from '../../src/data/repo'
+import { db } from '../../src/data/db'
+import { addEntry, allEntries, deleteEntry, fillMissingGenres, updateEntry } from '../../src/data/repo'
 import { resetDb } from '../helpers/db'
 
 const NOW = 1_700_000_000_000
@@ -47,6 +48,68 @@ describe('repo', () => {
     expect(updated).toMatchObject({ id: saved.id, createdAt: NOW, status: 'finished', seasons: 6 })
     expect(updated.stoppedSeason).toBeUndefined()
     expect(updated.stopReason).toBeUndefined()
+  })
+
+  it('keeps stored genres when an update never set them', async () => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', source: 'tmdb', sourceId: 'movie/438631' }, NOW)
+
+    const [openedOnForm] = await allEntries()
+
+    await fillMissingGenres(openedOnForm.id, ['scifi'])
+    await updateEntry({ ...openedOnForm, rating: 'loved' })
+
+    const [updated] = await allEntries()
+
+    expect(updated).toMatchObject({ rating: 'loved', genres: ['scifi'] })
+  })
+
+  it('saves genres an update cleared', async () => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', genres: ['scifi'] }, NOW)
+
+    const [saved] = await allEntries()
+
+    await updateEntry({ ...saved, genres: [] })
+
+    const [updated] = await allEntries()
+
+    expect(updated.genres).toEqual([])
+  })
+
+  it('fills in genres that were never set', async () => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', source: 'tmdb', sourceId: 'movie/438631' }, NOW)
+
+    const [saved] = await allEntries()
+
+    expect(await fillMissingGenres(saved.id, ['scifi'])).toBe(true)
+    expect((await allEntries())[0]).toEqual({ ...saved, genres: ['scifi'] })
+  })
+
+  it.each([
+    ['genres the owner ticked', ['drama']],
+    ['genres the owner cleared', []],
+  ] as const)('does not overwrite %s', async (_name, genres) => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', genres: [...genres] }, NOW)
+
+    const [saved] = await allEntries()
+
+    expect(await fillMissingGenres(saved.id, ['scifi'])).toBe(false)
+    expect((await allEntries())[0].genres).toEqual(genres)
+  })
+
+  it('does not bring back an entry deleted meanwhile', async () => {
+    expect(await fillMissingGenres('missing', ['scifi'])).toBe(false)
+    expect(await allEntries()).toEqual([])
+  })
+
+  it('normalises when it fills genres', async () => {
+    await db.entries.put({ id: 'a', title: ' Dune ', type: 'movie', status: 'finished', createdAt: NOW, seasons: 2 })
+
+    await fillMissingGenres('a', ['scifi'])
+
+    const [filled] = await allEntries()
+
+    expect(filled.title).toBe('Dune')
+    expect(filled.seasons).toBeUndefined()
   })
 
   it('deletes an entry', async () => {

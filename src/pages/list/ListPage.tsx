@@ -10,16 +10,19 @@ import {
   ALL_STATUSES,
   ALL_TYPES,
   filterEntries,
+  offeredGenres,
+  offeredRatings,
   sortNewestFirst,
   type StatusFilter,
   type TypeFilter,
   verdictLabel,
 } from '../../domain/entries'
-import { type Entry, isMediaType, type Status } from '../../domain/types'
+import { type Entry, type Genre, isMediaType, type Rating, type Status } from '../../domain/types'
 import { HOME_PATH } from '../../navigation/paths'
 import { AddTitleButton } from '../entry/AddTitleButton'
 import { useEntrySheet } from '../entry/useEntrySheet'
 import { LIST_COPY } from './copy'
+import { ListFilters } from './ListFilters'
 import './list.css'
 
 function TitleCard({ entry, onOpen }: { entry: Entry; onOpen: () => void }) {
@@ -39,11 +42,29 @@ function TitleCard({ entry, onOpen }: { entry: Entry; onOpen: () => void }) {
 function TitleList({ type, label }: { type: TypeFilter; label: string }) {
   const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES)
   const [query, setQuery] = useState('')
+  const [rating, setRating] = useState<Rating>()
+  const [genre, setGenre] = useState<Genre>()
   const entries = useAllEntries()
   const { openAdd, openEdit, sheet } = useEntrySheet(type)
   const router = useIonRouter()
   const ofType = filterEntries(entries ?? [], { type, status: ALL_STATUSES, query: '' })
-  const shown = sortNewestFirst(filterEntries(ofType, { type, status, query }))
+  const ratings = offeredRatings(ofType)
+  const genres = offeredGenres(ofType)
+  const activeRating = ratings.find((offered) => offered === rating)
+  const activeGenre = genres.find((offered) => offered === genre)
+
+  if (rating !== activeRating) {
+    setRating(undefined)
+  }
+
+  if (genre !== activeGenre) {
+    setGenre(undefined)
+  }
+
+  const shown = sortNewestFirst(
+    filterEntries(ofType, { type, status, query, rating: activeRating, genre: activeGenre }),
+  )
+
   const countOf = (counted: Status) => ofType.filter((entry) => entry.status === counted).length
 
   const statusPills: { filter: StatusFilter; text: string }[] = [
@@ -97,6 +118,14 @@ function TitleList({ type, label }: { type: TypeFilter; label: string }) {
               </button>
             ))}
           </div>
+          <ListFilters
+            ratings={ratings}
+            rating={activeRating}
+            onRating={setRating}
+            genres={genres}
+            genre={activeGenre}
+            onGenre={setGenre}
+          />
           {entries && ofType.length === 0 && <p className="list-empty">{LIST_COPY.emptyType}</p>}
           {ofType.length > 0 && shown.length === 0 && <p className="list-empty">{LIST_COPY.noMatches}</p>}
           <div className="title-grid">

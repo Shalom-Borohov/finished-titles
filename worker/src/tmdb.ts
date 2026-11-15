@@ -87,6 +87,7 @@ function toSearchResults(entry: TmdbEntry): SearchResult[] {
       type: isMovie ? 'movie' : tvType(entry),
       year: yearOf(date),
       posterUrl: entry.poster_path ? `${POSTER_URL}${entry.poster_path}` : undefined,
+      ...(entry.genre_ids ? { genreIds: entry.genre_ids } : {}),
     },
   ]
 }

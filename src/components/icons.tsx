@@ -50,6 +50,19 @@ export const ForwardChevronIcon = () => (
   </LineIcon>
 )
 
+export const DownChevronIcon = ({ className }: { className?: string }) => (
+  <LineIcon size={16} strokeWidth={2.4} className={className}>
+    <path d="M4 6l4 4 4-4" />
+  </LineIcon>
+)
+
+export const TagIcon = () => (
+  <LineIcon size={22} strokeWidth={2.2}>
+    <path d="M3 11V4a1 1 0 0 1 1-1h7l8 8-8 8z" />
+    <circle cx="7.5" cy="7.5" r="1.2" />
+  </LineIcon>
+)
+
 export const ShareIcon = () => (
   <LineIcon size={22} strokeWidth={2.2}>
     <path d="M11 13V3M7 6.5 11 3l4 3.5M6 10H5v9h12v-9h-1" />

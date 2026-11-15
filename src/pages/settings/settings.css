@@ -30,6 +30,35 @@
   line-height: 1.4;
 }
 
+.genre-fill-progress {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.9375rem;
+}
+
+.genre-fill-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--app-ground);
+}
+
+.genre-fill-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--app-accent);
+  transition: width 0.2s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .genre-fill-bar {
+    transition: none;
+  }
+}
+
 .tmdb-logo {
   display: block;
   height: 14px;

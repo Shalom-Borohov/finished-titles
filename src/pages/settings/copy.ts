@@ -8,6 +8,26 @@ export const SETTINGS_COPY = {
   confirmImport: 'החלפת הרשימה',
   backupRestored: 'הגיבוי שוחזר',
   invalidBackup: 'קובץ הגיבוי לא תקין',
+  genres: 'ז׳אנרים',
+  fillGenres: 'השלמת ז׳אנרים מ-TMDB',
+  genresWaiting: (count: number) =>
+    count === 1
+      ? 'לכותר אחד מ-TMDB עדיין אין ז׳אנרים, ולכן הסינון לפי ז׳אנר לא מוצא אותו.'
+      : `ל-${count} כותרים מ-TMDB עדיין אין ז׳אנרים, ולכן הסינון לפי ז׳אנר לא מוצא אותם.`,
+  fillingGenres: (done: number, total: number) => `משלים… ${done} מתוך ${total}`,
+  genreFillProgress: 'התקדמות השלמת הז׳אנרים',
+  genresFilled: (filled: number, failed: number) => {
+    const filledLine = filled === 1 ? 'הושלם כותר אחד.' : `הושלמו ${filled} כותרים.`
+
+    if (failed === 0) {
+      return filledLine
+    }
+
+    const failedLine = `${failed === 1 ? 'כותר אחד לא הצליח' : `${failed} לא הצליחו`}, ואפשר לנסות שוב.`
+
+    return filled === 0 ? failedLine : `${filledLine} ${failedLine}`
+  },
+  retryGenres: (count: number) => (count === 1 ? 'ניסיון חוזר לכותר אחד' : `ניסיון חוזר ל-${count} כותרים`),
   feedback: 'משוב',
   reportBugOrIdea: 'דיווח על באג / הצעה',
   report: 'דיווח',

@@ -65,6 +65,7 @@ describe('TMDB search', () => {
         type: 'series',
         year: 2008,
         posterUrl: 'https://image.tmdb.org/t/p/w342/bb.jpg',
+        genreIds: [DRAMA_GENRE],
       },
     ])
   })
@@ -95,6 +96,28 @@ describe('TMDB search', () => {
     const body = await searchBody('show', TMDB_ENV)
 
     expect(body.results[0].type).toBe(expectedType)
+  })
+
+  it.each([
+    ['several genres', [ANIMATION_GENRE, DRAMA_GENRE]],
+    ['an empty genre list', []],
+  ])('carries TMDB genre ids with %s', async (_description, genreIds) => {
+    stubTmdbResults([{ id: 1, media_type: 'tv', name: 'Show', genre_ids: genreIds }])
+
+    const body = await searchBody('show', TMDB_ENV)
+
+    expect(body.results[0].genreIds).toStrictEqual(genreIds)
+  })
+
+  it.each([
+    ['null', { genre_ids: null }],
+    ['absent', {}],
+  ])('leaves out genre ids when TMDB sends them %s', async (_description, fields) => {
+    stubTmdbResults([{ id: 1, media_type: 'tv', name: 'Show', ...fields }])
+
+    const body = await searchBody('show', TMDB_ENV)
+
+    expect(body.results[0]).not.toHaveProperty('genreIds')
   })
 
   it('treats TV with no genre or country data as a series', async () => {

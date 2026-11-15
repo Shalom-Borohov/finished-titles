@@ -7,6 +7,7 @@ export type SearchResult = {
   type: 'anime' | 'series' | 'movie' | 'book' | 'game'
   year?: number
   posterUrl?: string
+  genreIds?: number[]
 }
 
 export type SearchResponse = {

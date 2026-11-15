@@ -1,4 +1,5 @@
 import {
+  array,
   check,
   type InferOutput,
   integer,
@@ -35,6 +36,32 @@ export const RATINGS = ['favorite', 'loved', 'liked', 'okay', 'disliked'] as con
 
 export type Rating = (typeof RATINGS)[number]
 
+export const GENRES = [
+  'horror',
+  'animation',
+  'action',
+  'drama',
+  'history',
+  'adventure',
+  'kids',
+  'scifi',
+  'music',
+  'thriller',
+  'war',
+  'mystery',
+  'western',
+  'family',
+  'politics',
+  'fantasy',
+  'crime',
+  'comedy',
+  'reality',
+  'romance',
+  'documentary',
+] as const
+
+export type Genre = (typeof GENRES)[number]
+
 export const SEARCH_SOURCES = ['tmdb', 'openlibrary', 'igdb'] as const
 
 const seasonSchema = pipe(number(), integer(), minValue(MINIMUM_SEASON))
@@ -58,6 +85,7 @@ export const entrySchema = object({
   seasons: optional(seasonSchema),
   stoppedSeason: optional(seasonSchema),
   stopReason: optional(string()),
+  genres: optional(array(picklist(GENRES))),
 })
 
 export type Entry = InferOutput<typeof entrySchema>

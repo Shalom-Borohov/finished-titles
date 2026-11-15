@@ -1,7 +1,17 @@
 import { COMMON_COPY } from '../copy/common'
 import { RATING_LABELS, VERDICT_COPY } from '../copy/labels'
 import { finishYear, isYearOnly } from './finishDate'
-import { type Entry, isShowType, MEDIA_TYPES, type MediaType, type Status } from './types'
+import {
+  type Entry,
+  GENRES,
+  type Genre,
+  isShowType,
+  MEDIA_TYPES,
+  type MediaType,
+  RATINGS,
+  type Rating,
+  type Status,
+} from './types'
 
 const HOME_TILE_POSTERS = 3
 
@@ -17,6 +27,8 @@ type EntryFilter = {
   type: TypeFilter
   status: StatusFilter
   query: string
+  rating?: Rating
+  genre?: Genre
 }
 
 type ExistingCandidate = Pick<Entry, 'title' | 'type' | 'source' | 'sourceId'>
@@ -74,15 +86,33 @@ export function verdictLabel(entry: Entry) {
   return parts.join(COMMON_COPY.separator)
 }
 
-export function filterEntries(entries: Entry[], { type, status, query }: EntryFilter) {
+export function filterEntries(entries: Entry[], { type, status, query, rating, genre }: EntryFilter) {
   const searchedTitle = normalizedTitle(query)
 
   return entries.filter(
     (entry) =>
       (type === ALL_TYPES || entry.type === type) &&
       (status === ALL_STATUSES || entry.status === status) &&
+      (!rating || entry.rating === rating) &&
+      (!genre || entry.genres?.includes(genre)) &&
       normalizedTitle(entry.title).includes(searchedTitle),
   )
+}
+
+export function offeredRatings(entries: Entry[]): Rating[] {
+  const rated = new Set(entries.map(({ rating }) => rating))
+
+  return RATINGS.filter((rating) => rated.has(rating))
+}
+
+export function offeredGenres(entries: Entry[]): Genre[] {
+  const tagged = new Set(entries.flatMap(({ genres }) => genres))
+
+  return GENRES.filter((genre) => tagged.has(genre))
+}
+
+export function awaitingGenres(entries: Entry[]) {
+  return entries.filter(({ source, genres }) => source === 'tmdb' && genres === undefined)
 }
 
 export function homeTiles(entries: Entry[]): HomeTile[] {

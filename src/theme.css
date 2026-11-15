@@ -196,12 +196,13 @@ ion-content::part(scroll) {
   min-height: 44px;
   padding: 0 14px;
   border-radius: var(--app-radius-pill);
-  background: var(--app-surface);
+  background: var(--pill-background, var(--app-surface));
   color: var(--app-ink);
   font-size: 0.9375rem;
 }
 
-.pill[aria-pressed='true'] {
+.pill[aria-pressed='true'],
+.pill-chosen {
   background: var(--app-accent);
   color: var(--ion-color-primary-contrast);
   font-weight: 500;

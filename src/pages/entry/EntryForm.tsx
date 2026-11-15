@@ -16,6 +16,7 @@ import { TitleDetailsPage } from '../details/TitleDetailsPage'
 import { ENTRY_COPY } from './copy'
 import { DateFields, RatingPills, SeasonStepper } from './formFields'
 import { FormIdentity } from './FormIdentity'
+import { GenreField } from './GenreField'
 import { dateProblem, draftFromForm, type EntryFormState } from './formState'
 import { MoreDetailsRow } from './MoreDetailsRow'
 import { useShowPrefill } from './useShowPrefill'
@@ -117,6 +118,8 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
                 </button>
               </p>
             )}
+
+            <GenreField genres={form.genres} onChange={(genres) => change({ genres })} />
 
             <Segmented
               label={ENTRY_COPY.statusField}

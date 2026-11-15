@@ -74,6 +74,44 @@
   color: var(--app-accent);
 }
 
+.genre-card {
+  border-radius: var(--app-radius-card);
+  background: var(--app-surface);
+}
+
+.genre-row {
+  gap: 12px;
+  width: 100%;
+  text-align: start;
+}
+
+.genre-summary {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--app-ink-soft);
+  font-weight: 400;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.genre-chevron {
+  flex: none;
+}
+
+.genre-row[aria-expanded='true'] .genre-chevron {
+  transform: rotate(180deg);
+}
+
+.genre-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 12px 12px;
+  --pill-background: var(--app-ground);
+}
+
 .duplicate-hint {
   display: flex;
   align-items: center;
