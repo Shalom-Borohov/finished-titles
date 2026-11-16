@@ -15,8 +15,11 @@ import '@fontsource/rubik/latin-700.css'
 import './theme.css'
 
 import { App } from './App'
+import { blockSystemEdgeSwipe } from './navigation/edgeSwipe'
 
 setupIonicReact({ mode: 'ios' })
+
+blockSystemEdgeSwipe(document)
 
 navigator.storage?.persist?.()
 
