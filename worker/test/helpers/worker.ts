@@ -9,8 +9,16 @@ export const BASE_ENV: Env = { ALLOWED_ORIGINS: `${APP_ORIGIN},${LOCAL_ORIGIN}` 
 export const ALLOWED_ORIGIN_HEADERS = { Origin: APP_ORIGIN }
 export const TMDB_HOST = 'api.themoviedb.org'
 export const TMDB_ENV: Env = { ...BASE_ENV, TMDB_TOKEN: 'tmdb-test-token' }
+export const OPEN_LIBRARY_HOST = 'openlibrary.org'
+export const TWITCH_HOST = 'id.twitch.tv'
+export const IGDB_HOST = 'api.igdb.com'
+export const WORKER_URL = 'https://finished-titles-search.example'
 
-const WORKER_URL = 'https://finished-titles-search.example'
+export const emptyOpenLibraryReply = () => Response.json({ docs: [], numFound: 0 })
+
+export function igdbGames(count: number) {
+  return Array.from({ length: count }, (_, position) => ({ id: position + 1, name: `Game ${position + 1}` }))
+}
 
 export type RecordedRequest = {
   url: URL
@@ -61,14 +69,27 @@ export function callWorker(path: string, init: RequestInit, env: Env = BASE_ENV)
   return worker.fetch(new Request(`${WORKER_URL}${path}`, init), env)
 }
 
-export function search(query: string, env: Env = BASE_ENV) {
+export function searchPath(query: string, page?: number) {
   const params = new URLSearchParams({ q: query })
 
-  return callWorker(`/search?${params}`, { headers: ALLOWED_ORIGIN_HEADERS }, env)
+  if (page !== undefined) {
+    params.set('page', String(page))
+  }
+
+  return `/search?${params}`
 }
 
-export async function searchBody(query: string, env: Env = BASE_ENV) {
-  const response = await search(query, env)
+type SearchOptions = {
+  env?: Env
+  page?: number
+}
+
+export function search(query: string, { env = BASE_ENV, page }: SearchOptions = {}) {
+  return callWorker(searchPath(query, page), { headers: ALLOWED_ORIGIN_HEADERS }, env)
+}
+
+export async function searchBody(query: string, options: SearchOptions = {}) {
+  const response = await search(query, options)
 
   return response.json<SearchResponse>()
 }

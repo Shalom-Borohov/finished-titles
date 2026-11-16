@@ -1,12 +1,11 @@
 import { array, type InferOutput, nullish, number, object, string } from 'valibot'
-import type { Env, SearchResult } from './types'
+import type { Env, SearchResult, SourcePage } from './types'
 import { isUsableTitle, parseUpstreamJson } from './upstream'
 
 export const TMDB_URL = 'https://api.themoviedb.org/3'
 const SEARCH_URL = `${TMDB_URL}/search/multi`
 const TV_URL = `${TMDB_URL}/tv`
 const POSTER_URL = 'https://image.tmdb.org/t/p/w342'
-const MAX_RESULTS = 8
 const MOVIE_MEDIA_TYPE = 'movie'
 const TV_MEDIA_TYPE = 'tv'
 const ANIMATION_GENRE_ID = 16
@@ -16,7 +15,7 @@ const FULL_DATE = /^\d{4}-\d{2}-\d{2}$/
 const ISO_DATE_LENGTH = 10
 const FIRST_REGULAR_SEASON = 1
 const FINISHED_STATUSES: readonly string[] = ['Ended', 'Canceled']
-const FIXED_SEARCH_PARAMS = { include_adult: 'false', language: 'en-US', page: '1' }
+const FIXED_SEARCH_PARAMS = { include_adult: 'false', language: 'en-US' }
 
 const entrySchema = object({
   id: number(),
@@ -30,7 +29,7 @@ const entrySchema = object({
   origin_country: nullish(array(string())),
 })
 
-const responseSchema = object({ results: array(entrySchema) })
+const responseSchema = object({ results: array(entrySchema), total_pages: number() })
 
 const seasonSchema = object({ season_number: number(), air_date: nullish(string()) })
 const tvDetailsSchema = object({
@@ -104,16 +103,16 @@ export function authorizedHeaders(env: Env) {
   return { Authorization: `Bearer ${env.TMDB_TOKEN}` }
 }
 
-export async function searchTmdb(query: string, env: Env): Promise<SearchResult[]> {
+export async function searchTmdb(query: string, page: number, env: Env): Promise<SourcePage> {
   const headers = authorizedHeaders(env)
   const url = new URL(SEARCH_URL)
 
-  url.search = new URLSearchParams({ query, ...FIXED_SEARCH_PARAMS }).toString()
+  url.search = new URLSearchParams({ query, ...FIXED_SEARCH_PARAMS, page: String(page) }).toString()
 
   const response = await fetch(url, { headers })
-  const { results } = await parseUpstreamJson(response, responseSchema)
+  const { results, total_pages: totalPages } = await parseUpstreamJson(response, responseSchema)
 
-  return results.filter(isMovieOrTv).flatMap(toSearchResults).slice(0, MAX_RESULTS)
+  return { results: results.filter(isMovieOrTv).flatMap(toSearchResults), hasMore: page < totalPages }
 }
 
 export async function tmdbSeasonFacts(tvId: string, env: Env): Promise<SeasonFacts> {

@@ -52,7 +52,13 @@ export function useEntrySheet(listType: TypeFilter) {
   const sheet = (
     <IonModal isOpen={isOpen} backdropDismiss={false} onDidDismiss={close}>
       {step.kind === 'search' && (
-        <SearchStep onPickResult={pickResult} onOpenExisting={openEdit} onManualEntry={openManual} onClose={close} />
+        <SearchStep
+          listType={listType}
+          onPickResult={pickResult}
+          onOpenExisting={openEdit}
+          onManualEntry={openManual}
+          onClose={close}
+        />
       )}
       {step.kind === 'form' && (
         <EntryForm

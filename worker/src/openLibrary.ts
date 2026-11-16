@@ -1,12 +1,11 @@
 import { array, nullish, number, object, string } from 'valibot'
-import type { SearchResult } from './types'
-import { isUsableTitle, parseUpstreamJson } from './upstream'
+import type { SearchResult, SourcePage } from './types'
+import { isUsableTitle, PAGE_SIZE, parseUpstreamJson } from './upstream'
 
 const SEARCH_URL = 'https://openlibrary.org/search.json'
 const COVER_URL = 'https://covers.openlibrary.org/b/id'
 const USER_AGENT = 'finished-titles (personal project)'
 const REQUESTED_FIELDS = 'key,title,first_publish_year,cover_i'
-const MAX_RESULTS = 5
 
 const responseSchema = object({
   docs: array(
@@ -17,19 +16,21 @@ const responseSchema = object({
       cover_i: nullish(number()),
     }),
   ),
+  numFound: number(),
 })
 
-export async function searchOpenLibrary(query: string): Promise<SearchResult[]> {
+export async function searchOpenLibrary(query: string, page: number): Promise<SourcePage> {
   const url = new URL(SEARCH_URL)
 
   url.search = new URLSearchParams({
     q: query,
     fields: REQUESTED_FIELDS,
-    limit: String(MAX_RESULTS),
+    limit: String(PAGE_SIZE),
+    page: String(page),
   }).toString()
 
   const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT } })
-  const { docs } = await parseUpstreamJson(response, responseSchema)
+  const { docs, numFound } = await parseUpstreamJson(response, responseSchema)
 
   const results = docs.flatMap((doc): SearchResult[] => {
     if (!isUsableTitle(doc.title)) {
@@ -48,5 +49,5 @@ export async function searchOpenLibrary(query: string): Promise<SearchResult[]> 
     ]
   })
 
-  return results.slice(0, MAX_RESULTS)
+  return { results, hasMore: page * PAGE_SIZE < numFound }
 }

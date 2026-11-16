@@ -1,5 +1,7 @@
 import { type GenericSchema, parse } from 'valibot'
 
+export const PAGE_SIZE = 20
+
 export async function parseUpstreamJson<Output>(
   response: Response,
   schema: GenericSchema<unknown, Output>,

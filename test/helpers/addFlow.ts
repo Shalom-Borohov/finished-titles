@@ -6,9 +6,12 @@ export const pressButton = async (name: string) => fireEvent.click(await screen.
 
 export const openAdd = async () => pressButton('הוספת כותר')
 
+export const typeQuery = async (query: string) =>
+  fireEvent.change(await screen.findByLabelText('חיפוש כותר'), { target: { value: query } })
+
 export async function searchFor(query: string) {
   await openAdd()
-  fireEvent.change(await screen.findByLabelText('חיפוש כותר'), { target: { value: query } })
+  await typeQuery(query)
 }
 
 export async function pickResult(name: RegExp) {
