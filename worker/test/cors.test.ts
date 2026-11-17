@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { APP_ORIGIN, BASE_ENV, callWorker, LOCAL_ORIGIN, OTHER_ORIGIN, stubUpstreams } from './helpers/worker'
+import {
+  APP_ORIGIN,
+  BASE_ENV,
+  callWorker,
+  emptyOpenLibraryReply,
+  LOCAL_ORIGIN,
+  OPEN_LIBRARY_HOST,
+  OTHER_ORIGIN,
+  stubUpstreams,
+} from './helpers/worker'
 
-const OPEN_LIBRARY_HOST = 'openlibrary.org'
 const SEARCH_PATH = '/search?q=dune'
 
 function stubOpenLibrary() {
-  return stubUpstreams({ [OPEN_LIBRARY_HOST]: () => Response.json({ docs: [] }) })
+  return stubUpstreams({ [OPEN_LIBRARY_HOST]: emptyOpenLibraryReply })
 }
 
 describe('allowed origins', () => {

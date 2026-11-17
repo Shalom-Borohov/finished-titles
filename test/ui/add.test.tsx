@@ -38,7 +38,7 @@ describe('adding a title', () => {
     await searchFor('dune')
 
     expect(await screen.findByRole('button', { name: /Dune.*סרט · 2021/ })).toBeVisible()
-    expect(String(fetchStub.mock.calls[0][0])).toBe(`${SEARCH_URL}/search?q=dune`)
+    expect(String(fetchStub.mock.calls[0][0])).toBe(`${SEARCH_URL}/search?q=dune&page=1`)
   })
 
   it('logs a search result as finished today, with its poster, year and source', async () => {

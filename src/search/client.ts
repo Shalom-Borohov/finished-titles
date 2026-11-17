@@ -1,5 +1,6 @@
 import {
   array,
+  boolean,
   check,
   fallback,
   filterItems,
@@ -44,6 +45,7 @@ const searchResponseSchema = object({
     array(searchResultSchema),
   ),
   unavailable: array(string()),
+  hasMore: optional(boolean(), false),
 })
 
 const showPrefillSchema = object({
@@ -96,8 +98,10 @@ async function fetchFromSearchService(path: string, signal: AbortSignal): Promis
   return response.json()
 }
 
-export async function searchTitles(query: string, signal: AbortSignal): Promise<SearchResponse> {
-  return parse(searchResponseSchema, await fetchFromSearchService(`/search?q=${encodeURIComponent(query)}`, signal))
+export async function searchTitles(query: string, page: number, signal: AbortSignal): Promise<SearchResponse> {
+  const path = `/search?q=${encodeURIComponent(query)}&page=${page}`
+
+  return parse(searchResponseSchema, await fetchFromSearchService(path, signal))
 }
 
 const tmdbTitleMatch = (titleId: string) => TMDB_TITLE_ID.exec(titleId)

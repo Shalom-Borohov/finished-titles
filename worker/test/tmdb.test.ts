@@ -1,19 +1,29 @@
 import { describe, expect, it } from 'vitest'
-import { BASE_ENV, requestTo, searchBody, stubUpstreams, TMDB_ENV, TMDB_HOST } from './helpers/worker'
+import { PAGE_SIZE } from '../src/upstream'
+import {
+  BASE_ENV,
+  emptyOpenLibraryReply,
+  OPEN_LIBRARY_HOST,
+  requestTo,
+  searchBody,
+  stubUpstreams,
+  TMDB_ENV,
+  TMDB_HOST,
+} from './helpers/worker'
 
-const OPEN_LIBRARY_HOST = 'openlibrary.org'
 const ANIMATION_GENRE = 16
 const DRAMA_GENRE = 18
+const SINGLE_PAGE = 1
 
 function stubTmdb(reply: () => Response) {
   return stubUpstreams({
     [TMDB_HOST]: reply,
-    [OPEN_LIBRARY_HOST]: () => Response.json({ docs: [] }),
+    [OPEN_LIBRARY_HOST]: emptyOpenLibraryReply,
   })
 }
 
-function stubTmdbResults(results: object[]) {
-  return stubTmdb(() => Response.json({ results }))
+function stubTmdbResults(results: object[], totalPages = SINGLE_PAGE) {
+  return stubTmdb(() => Response.json({ results, total_pages: totalPages }))
 }
 
 describe('TMDB search', () => {
@@ -28,7 +38,7 @@ describe('TMDB search', () => {
       },
     ])
 
-    const body = await searchBody('matrix', TMDB_ENV)
+    const body = await searchBody('matrix', { env: TMDB_ENV })
 
     expect(body.results).toStrictEqual([
       {
@@ -55,7 +65,7 @@ describe('TMDB search', () => {
       },
     ])
 
-    const body = await searchBody('breaking', TMDB_ENV)
+    const body = await searchBody('breaking', { env: TMDB_ENV })
 
     expect(body.results).toStrictEqual([
       {
@@ -76,7 +86,7 @@ describe('TMDB search', () => {
       { id: 1396, media_type: 'tv', name: 'Breaking Bad' },
     ])
 
-    const body = await searchBody('anything', TMDB_ENV)
+    const body = await searchBody('anything', { env: TMDB_ENV })
     const [movie, series] = body.results
 
     expect(movie.sourceId).not.toBe(series.sourceId)
@@ -93,7 +103,7 @@ describe('TMDB search', () => {
       { id: 1, media_type: mediaType, name: 'Show', title: 'Show', genre_ids: genreIds, origin_country: originCountry },
     ])
 
-    const body = await searchBody('show', TMDB_ENV)
+    const body = await searchBody('show', { env: TMDB_ENV })
 
     expect(body.results[0].type).toBe(expectedType)
   })
@@ -104,7 +114,7 @@ describe('TMDB search', () => {
   ])('carries TMDB genre ids with %s', async (_description, genreIds) => {
     stubTmdbResults([{ id: 1, media_type: 'tv', name: 'Show', genre_ids: genreIds }])
 
-    const body = await searchBody('show', TMDB_ENV)
+    const body = await searchBody('show', { env: TMDB_ENV })
 
     expect(body.results[0].genreIds).toStrictEqual(genreIds)
   })
@@ -115,7 +125,7 @@ describe('TMDB search', () => {
   ])('leaves out genre ids when TMDB sends them %s', async (_description, fields) => {
     stubTmdbResults([{ id: 1, media_type: 'tv', name: 'Show', ...fields }])
 
-    const body = await searchBody('show', TMDB_ENV)
+    const body = await searchBody('show', { env: TMDB_ENV })
 
     expect(body.results[0]).not.toHaveProperty('genreIds')
   })
@@ -123,7 +133,7 @@ describe('TMDB search', () => {
   it('treats TV with no genre or country data as a series', async () => {
     stubTmdbResults([{ id: 1, media_type: 'tv', name: 'Show' }])
 
-    const body = await searchBody('show', TMDB_ENV)
+    const body = await searchBody('show', { env: TMDB_ENV })
 
     expect(body.results[0].type).toBe('series')
   })
@@ -134,7 +144,7 @@ describe('TMDB search', () => {
       { id: 2, media_type: 'movie', title: 'John Wick' },
     ])
 
-    const body = await searchBody('keanu', TMDB_ENV)
+    const body = await searchBody('keanu', { env: TMDB_ENV })
 
     expect(body.results.map((result) => result.title)).toEqual(['John Wick'])
   })
@@ -146,7 +156,7 @@ describe('TMDB search', () => {
   ])('omits the year and poster with %s', async (_description, fields) => {
     stubTmdbResults([{ id: 7, media_type: 'movie', title: 'Obscure', ...fields }])
 
-    const body = await searchBody('obscure', TMDB_ENV)
+    const body = await searchBody('obscure', { env: TMDB_ENV })
 
     expect(body.results).toStrictEqual([{ source: 'tmdb', sourceId: 'movie/7', title: 'Obscure', type: 'movie' }])
   })
@@ -159,31 +169,43 @@ describe('TMDB search', () => {
       { id: 4, media_type: 'movie', title: 'Kept' },
     ])
 
-    const body = await searchBody('anything', TMDB_ENV)
+    const body = await searchBody('anything', { env: TMDB_ENV })
 
     expect(body.results.map((result) => result.sourceId)).toEqual(['movie/4'])
   })
 
-  it('keeps at most 8, counted after filtering', async () => {
+  it('keeps every movie and series on the page', async () => {
     const people = [{ id: 100, media_type: 'person', name: 'Someone' }]
 
-    const movies = [1, 2, 3, 4, 5, 6, 7, 8, 9].map((id) => ({
-      id,
+    const movies = Array.from({ length: PAGE_SIZE - people.length }, (_, position) => ({
+      id: position + 1,
       media_type: 'movie',
-      title: `Movie ${id}`,
+      title: `Movie ${position + 1}`,
     }))
 
     stubTmdbResults([...people, ...movies])
 
-    const body = await searchBody('movie', TMDB_ENV)
+    const body = await searchBody('movie', { env: TMDB_ENV })
 
-    expect(body.results.map((result) => result.title)).toEqual([1, 2, 3, 4, 5, 6, 7, 8].map((id) => `Movie ${id}`))
+    expect(body.results).toHaveLength(movies.length)
+  })
+
+  it.each([
+    ['more pages remain', 2, 3, true],
+    ['it is the last page', 3, 3, false],
+    ['TMDB found a single page', 1, 1, false],
+  ])('says whether TMDB has another page when %s', async (_description, page, totalPages, hasMore) => {
+    stubTmdbResults([{ id: 1, media_type: 'movie', title: 'Dune' }], totalPages)
+
+    const body = await searchBody('dune', { env: TMDB_ENV, page })
+
+    expect(body.hasMore).toBe(hasMore)
   })
 
   it('sends the agreed request with the bearer token and keeps the query as one parameter', async () => {
     const requests = stubTmdbResults([])
 
-    await searchBody('tom & jerry&include_adult=true', TMDB_ENV)
+    await searchBody('tom & jerry&include_adult=true', { env: TMDB_ENV })
 
     const request = requestTo(requests, TMDB_HOST)
 
@@ -197,13 +219,21 @@ describe('TMDB search', () => {
     expect(request.headers.get('Authorization')).toBe('Bearer tmdb-test-token')
   })
 
+  it('asks TMDB for the requested page', async () => {
+    const requests = stubTmdbResults([])
+
+    await searchBody('matrix', { env: TMDB_ENV, page: 3 })
+
+    expect(requestTo(requests, TMDB_HOST).url.searchParams.get('page')).toBe('3')
+  })
+
   it.each([
     ['absent', BASE_ENV],
     ['empty', { ...BASE_ENV, TMDB_TOKEN: '' }],
   ])('is unavailable without calling TMDB when the token is %s', async (_description, env) => {
     const requests = stubTmdbResults([])
 
-    const body = await searchBody('matrix', env)
+    const body = await searchBody('matrix', { env })
 
     expect(body.unavailable).toContain('tmdb')
     expect(requests.map(({ url }) => url.hostname)).not.toContain(TMDB_HOST)
@@ -212,12 +242,16 @@ describe('TMDB search', () => {
   it.each([
     ['an error status', () => new Response('nope', { status: 401 })],
     ['a body that is not JSON', () => new Response('<html></html>')],
-    ['JSON of the wrong shape', () => Response.json({ results: 'none' })],
-    ['a result with a malformed field', () => Response.json({ results: [{ id: 'one', media_type: 'movie' }] })],
+    ['JSON of the wrong shape', () => Response.json({ results: 'none', total_pages: 1 })],
+    ['JSON with no page count', () => Response.json({ results: [] })],
+    [
+      'a result with a malformed field',
+      () => Response.json({ results: [{ id: 'one', media_type: 'movie' }], total_pages: 1 }),
+    ],
   ])('is unavailable when TMDB returns %s', async (_description, reply) => {
     stubTmdb(reply)
 
-    const body = await searchBody('matrix', TMDB_ENV)
+    const body = await searchBody('matrix', { env: TMDB_ENV })
 
     expect(body.results).toEqual([])
     expect(body.unavailable).toContain('tmdb')

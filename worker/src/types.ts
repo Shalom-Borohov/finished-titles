@@ -10,9 +10,15 @@ export type SearchResult = {
   genreIds?: number[]
 }
 
+export type SourcePage = {
+  results: SearchResult[]
+  hasMore: boolean
+}
+
 export type SearchResponse = {
   results: SearchResult[]
   unavailable: SourceName[]
+  hasMore: boolean
 }
 
 export type TitleDetails = {

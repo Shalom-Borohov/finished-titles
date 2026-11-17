@@ -18,11 +18,18 @@ type StubResult = {
   genreIds?: number[]
 }
 
-type StubOptions = {
-  unavailable?: string[]
+type SearchPage = { results: StubResult[]; hasMore?: boolean; unavailable?: string[] }
+
+export type SearchReply = (request: URL) => Promise<Response>
+
+type OtherReplies = {
   seasonsReply?: () => Promise<Response>
   detailsReply?: (url: string) => Promise<Response>
 }
+
+type StubOptions = OtherReplies & { unavailable?: string[] }
+
+const SEARCH_PAGES_URL = `${SEARCH_URL}/search`
 
 const SEASONS_URL = `${SEARCH_URL}/seasons`
 
@@ -30,9 +37,50 @@ const DETAILS_URL = `${SEARCH_URL}/details`
 
 const notFound = async () => new Response(null, { status: 404 })
 
-export function stubSearchResults(
-  results: StubResult[],
-  { unavailable = [], seasonsReply = notFound, detailsReply = notFound }: StubOptions = {},
+const serverError = async () => new Response(null, { status: 500 })
+
+export const searchPageReply = async ({ results, hasMore = false, unavailable = [] }: SearchPage) =>
+  Response.json({ results, hasMore, unavailable })
+
+const pageOf = (request: URL) => Number(request.searchParams.get('page'))
+
+export const pagesReply = (pages: SearchPage[]) => async (request: URL) => searchPageReply(pages[pageOf(request) - 1])
+
+export function failingOnce(failingPage: number, reply: SearchReply): SearchReply {
+  let hasFailed = false
+
+  return async (request) => {
+    if (hasFailed || pageOf(request) !== failingPage) {
+      return reply(request)
+    }
+
+    hasFailed = true
+
+    return serverError()
+  }
+}
+
+export function holdingPage(heldPage: number, reply: SearchReply) {
+  let open: () => void
+
+  const opened = new Promise<void>((resolve) => {
+    open = resolve
+  })
+
+  const heldReply: SearchReply = async (request) => {
+    if (pageOf(request) === heldPage) {
+      await opened
+    }
+
+    return reply(request)
+  }
+
+  return { reply: heldReply, release: () => open() }
+}
+
+export function stubSearchPages(
+  searchReply: SearchReply,
+  { seasonsReply = notFound, detailsReply = notFound }: OtherReplies = {},
 ) {
   const fetchStub = vi.fn<typeof fetch>().mockImplementation(async (input) => {
     const url = String(input)
@@ -41,7 +89,7 @@ export function stubSearchResults(
       return seasonsReply()
     }
 
-    return url.startsWith(DETAILS_URL) ? detailsReply(url) : Response.json({ results, unavailable })
+    return url.startsWith(DETAILS_URL) ? detailsReply(url) : searchReply(new URL(url))
   })
 
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)
@@ -50,12 +98,19 @@ export function stubSearchResults(
   return fetchStub
 }
 
-const callsTo = (fetchStub: ReturnType<typeof stubSearchResults>, prefix: string) =>
+export const stubSearchResults = (results: StubResult[], { unavailable = [], ...otherReplies }: StubOptions = {}) =>
+  stubSearchPages(async () => searchPageReply({ results, unavailable }), otherReplies)
+
+type FetchStub = ReturnType<typeof stubSearchPages>
+
+const callsTo = (fetchStub: FetchStub, prefix: string) =>
   fetchStub.mock.calls.map(([input]) => String(input)).filter((url) => url.startsWith(prefix))
 
-export const seasonsCalls = (fetchStub: ReturnType<typeof stubSearchResults>) => callsTo(fetchStub, SEASONS_URL)
+export const searchCalls = (fetchStub: FetchStub) => callsTo(fetchStub, SEARCH_PAGES_URL)
 
-export const detailsCalls = (fetchStub: ReturnType<typeof stubSearchResults>) => callsTo(fetchStub, DETAILS_URL)
+export const seasonsCalls = (fetchStub: FetchStub) => callsTo(fetchStub, SEASONS_URL)
+
+export const detailsCalls = (fetchStub: FetchStub) => callsTo(fetchStub, DETAILS_URL)
 
 export function stubSearchFailure() {
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)

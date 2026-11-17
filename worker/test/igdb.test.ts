@@ -1,10 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Env, SearchResponse } from '../src/types'
-import { APP_ORIGIN, BASE_ENV, requestTo, stubUpstreams } from './helpers/worker'
+import { PAGE_SIZE } from '../src/upstream'
+import {
+  APP_ORIGIN,
+  BASE_ENV,
+  emptyOpenLibraryReply,
+  IGDB_HOST,
+  igdbGames,
+  OPEN_LIBRARY_HOST,
+  requestTo,
+  searchPath,
+  stubUpstreams,
+  TWITCH_HOST,
+  WORKER_URL,
+} from './helpers/worker'
 
-const TWITCH_HOST = 'id.twitch.tv'
-const IGDB_HOST = 'api.igdb.com'
-const OPEN_LIBRARY_HOST = 'openlibrary.org'
 const FIRST_TOKEN = 'first-token'
 const SECOND_TOKEN = 'second-token'
 const UTC_START_OF_2010 = 1262304000
@@ -29,7 +39,7 @@ function stubIgdb(igdbReply: Reply, twitchReply: Reply = tokenReplies()) {
   return stubUpstreams({
     [TWITCH_HOST]: twitchReply,
     [IGDB_HOST]: igdbReply,
-    [OPEN_LIBRARY_HOST]: () => Response.json({ docs: [] }),
+    [OPEN_LIBRARY_HOST]: emptyOpenLibraryReply,
   })
 }
 
@@ -44,11 +54,9 @@ function requestsTo(recorded: ReturnType<typeof stubUpstreams>, hostname: string
 async function freshSearcher(env: Env = IGDB_ENV) {
   const { default: worker } = await import('../src/index')
 
-  return async (query: string) => {
-    const params = new URLSearchParams({ q: query })
-
+  return async (query: string, page?: number) => {
     const response = await worker.fetch(
-      new Request(`https://finished-titles-search.example/search?${params}`, { headers: { Origin: APP_ORIGIN } }),
+      new Request(`${WORKER_URL}${searchPath(query, page)}`, { headers: { Origin: APP_ORIGIN } }),
       env,
     )
 
@@ -99,15 +107,28 @@ describe('IGDB search', () => {
     expect(body.results).toStrictEqual([{ source: 'igdb', sourceId: '2', title: 'Unreleased', type: 'game' }])
   })
 
-  it('drops games with no name and keeps at most 5', async () => {
-    const named = [1, 2, 3, 4, 5, 6].map((id) => ({ id, name: `Game ${id}` }))
-
-    stubIgdbGames([{ id: 100 }, { id: 101, name: '' }, ...named])
+  it('drops games with no name and keeps the rest of the page', async () => {
+    stubIgdbGames([{ id: 100 }, { id: 101, name: '' }, ...igdbGames(6)])
 
     const search = await freshSearcher()
     const body = await search('game')
 
-    expect(body.results.map((result) => result.sourceId)).toEqual(['1', '2', '3', '4', '5'])
+    expect(body.results.map((result) => result.sourceId)).toEqual(['1', '2', '3', '4', '5', '6'])
+  })
+
+  it.each([
+    ['a full page, unnamed games included', PAGE_SIZE, true],
+    ['less than a full page', PAGE_SIZE - 1, false],
+    ['no games', 0, false],
+  ])('says whether IGDB has another page when it returns %s', async (_description, gameCount, hasMore) => {
+    const games = igdbGames(gameCount).map((game, position) => (position === 0 ? { ...game, name: null } : game))
+
+    stubIgdbGames(games)
+
+    const search = await freshSearcher()
+    const body = await search('game')
+
+    expect(body.hasMore).toBe(hasMore)
   })
 
   it('asks Twitch for a client-credentials token', async () => {
@@ -127,7 +148,7 @@ describe('IGDB search', () => {
     })
   })
 
-  it('sends the agreed search request', async () => {
+  it('sends the agreed search request, leaving out editions of a game', async () => {
     const requests = stubIgdbGames([])
 
     const search = await freshSearcher()
@@ -139,7 +160,19 @@ describe('IGDB search', () => {
     expect(gamesRequest.url.pathname).toBe('/v4/games')
     expect(gamesRequest.headers.get('Client-ID')).toBe('test-client-id')
     expect(gamesRequest.headers.get('Authorization')).toBe(`Bearer ${FIRST_TOKEN}`)
-    expect(gamesRequest.body).toBe('search "zelda"; fields name,cover.image_id,first_release_date; limit 5;')
+    expect(gamesRequest.body).toBe(
+      `search "zelda"; fields name,cover.image_id,first_release_date; where version_parent = null; limit ${PAGE_SIZE}; offset 0;`,
+    )
+  })
+
+  it('skips the games before the requested page', async () => {
+    const page = 3
+    const requests = stubIgdbGames([])
+
+    const search = await freshSearcher()
+    await search('zelda', page)
+
+    expect(requestTo(requests, IGDB_HOST).body).toContain(`limit ${PAGE_SIZE}; offset ${(page - 1) * PAGE_SIZE};`)
   })
 
   it.each([
@@ -154,7 +187,7 @@ describe('IGDB search', () => {
     await search(query)
 
     expect(requestTo(requests, IGDB_HOST).body).toBe(
-      `search "${escaped}"; fields name,cover.image_id,first_release_date; limit 5;`,
+      `search "${escaped}"; fields name,cover.image_id,first_release_date; where version_parent = null; limit ${PAGE_SIZE}; offset 0;`,
     )
   })
 
@@ -178,7 +211,7 @@ describe('IGDB search', () => {
     const requests = stubUpstreams({
       [TWITCH_HOST]: tokenReplies(),
       [IGDB_HOST]: () => igdbReplies.splice(0, 1)[0](),
-      [OPEN_LIBRARY_HOST]: () => Response.json({ docs: [] }),
+      [OPEN_LIBRARY_HOST]: emptyOpenLibraryReply,
     })
 
     const search = await freshSearcher()
@@ -213,13 +246,13 @@ describe('IGDB search', () => {
     ['client ID is empty', { TWITCH_CLIENT_ID: '', TWITCH_CLIENT_SECRET: 'secret' }],
     ['client secret is empty', { TWITCH_CLIENT_ID: 'id', TWITCH_CLIENT_SECRET: '' }],
     ['credentials are absent', {}],
-  ])('is skipped, without calling out or being listed as unavailable, when the %s', async (_description, credentials) => {
+  ])('is unavailable, without calling out, when the %s', async (_description, credentials) => {
     const requests = stubIgdbGames([])
 
     const search = await freshSearcher({ ...BASE_ENV, ...credentials })
     const body = await search('zelda')
 
-    expect(body.unavailable).not.toContain('igdb')
+    expect(body.unavailable).toContain('igdb')
     expect(requestsTo(requests, TWITCH_HOST)).toHaveLength(0)
     expect(requestsTo(requests, IGDB_HOST)).toHaveLength(0)
   })

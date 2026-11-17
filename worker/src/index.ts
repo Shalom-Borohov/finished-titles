@@ -1,4 +1,16 @@
-import { maxLength, minLength, pipe, regex, safeParse, string, trim } from 'valibot'
+import {
+  maxLength,
+  maxValue,
+  minLength,
+  minValue,
+  nullish,
+  pipe,
+  regex,
+  safeParse,
+  string,
+  transform,
+  trim,
+} from 'valibot'
 import { corsHeaders, forbiddenResponse, isAllowedOrigin, preflightResponse } from './cors'
 import { searchIgdb } from './igdb'
 import { searchOpenLibrary } from './openLibrary'
@@ -12,10 +24,13 @@ const DETAILS_PATH = '/details'
 const READ_METHOD = 'GET'
 const PREFLIGHT_METHOD = 'OPTIONS'
 const QUERY_PARAMETER = 'q'
+const PAGE_PARAMETER = 'page'
 const TV_PARAMETER = 'tv'
 const TITLE_PARAMETER = 'title'
 const MIN_QUERY_LENGTH = 2
 const MAX_QUERY_LENGTH = 100
+const FIRST_PAGE = 1
+const MAX_PAGE = 500
 const DIGITS_ONLY = /^\d+$/
 const TMDB_TITLE_REFERENCE = /^(tv|movie)\/\d+$/
 const SOURCE_DEADLINE_MS = 8000
@@ -30,6 +45,12 @@ const SOURCES = [
 ] as const
 
 const querySchema = pipe(string(), trim(), minLength(MIN_QUERY_LENGTH), maxLength(MAX_QUERY_LENGTH))
+
+const pageSchema = nullish(
+  pipe(string(), regex(DIGITS_ONLY), transform(Number), minValue(FIRST_PAGE), maxValue(MAX_PAGE)),
+  String(FIRST_PAGE),
+)
+
 const tvIdSchema = pipe(string(), regex(DIGITS_ONLY))
 const titleSchema = pipe(string(), regex(TMDB_TITLE_REFERENCE))
 
@@ -39,14 +60,17 @@ function rejectAtDeadline(): Promise<never> {
   })
 }
 
-async function searchAllSources(query: string, env: Env): Promise<SearchResponse> {
+async function searchAllSources(query: string, page: number, env: Env): Promise<SearchResponse> {
   const outcomes = await Promise.allSettled(
-    SOURCES.map((source) => Promise.race([source.search(query, env), rejectAtDeadline()])),
+    SOURCES.map((source) => Promise.race([source.search(query, page, env), rejectAtDeadline()])),
   )
 
+  const answeredPages = outcomes.flatMap((outcome) => (outcome.status === 'fulfilled' ? [outcome.value] : []))
+
   return {
-    results: outcomes.flatMap((outcome) => (outcome.status === 'fulfilled' ? outcome.value : [])),
+    results: answeredPages.flatMap((sourcePage) => sourcePage.results),
     unavailable: SOURCES.filter((_source, index) => outcomes[index].status === 'rejected').map((source) => source.name),
+    hasMore: page < MAX_PAGE && answeredPages.some((sourcePage) => sourcePage.hasMore),
   }
 }
 
@@ -71,12 +95,13 @@ export default {
 
     if (url.pathname === SEARCH_PATH) {
       const query = safeParse(querySchema, url.searchParams.get(QUERY_PARAMETER))
+      const page = safeParse(pageSchema, url.searchParams.get(PAGE_PARAMETER))
 
-      if (!query.success) {
+      if (!query.success || !page.success) {
         return new Response(null, { status: BAD_REQUEST_STATUS, headers })
       }
 
-      return Response.json(await searchAllSources(query.output, env), { headers })
+      return Response.json(await searchAllSources(query.output, page.output, env), { headers })
     }
 
     if (url.pathname === SEASONS_PATH) {

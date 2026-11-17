@@ -1,73 +1,33 @@
 import { IonContent } from '@ionic/react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Poster } from '../../components/Poster'
 import { SheetHeader } from '../../components/SheetHeader'
 import { COMMON_COPY } from '../../copy/common'
 import { MEDIA_TYPE_SINGULAR_LABELS } from '../../copy/labels'
 import { useAllEntries } from '../../data/hooks'
-import { findExisting } from '../../domain/entries'
+import { findExisting, type TypeFilter } from '../../domain/entries'
 import type { Entry } from '../../domain/types'
-import { type SearchResponse, type SearchResult, searchTitles } from '../../search/client'
+import type { SearchResponse, SearchResult } from '../../search/client'
+import { resultKey } from '../../search/pages'
 import { ENTRY_COPY } from './copy'
+import { LoadMoreRow } from './LoadMoreRow'
+import { type SearchState, useTitleSearch } from './useTitleSearch'
 import './searchStep.css'
 
-const MINIMUM_QUERY_LENGTH = 2
-
 const MAXIMUM_QUERY_LENGTH = 100
-
-const SEARCH_DELAY_MS = 300
-
-type SearchOutcome = { phase: 'failed' } | ({ phase: 'done' } & SearchResponse)
-
-type SearchState = { phase: 'idle' } | { phase: 'searching' } | SearchOutcome
-
-function useTitleSearch(query: string): SearchState {
-  const [settled, setSettled] = useState<{ query: string; outcome: SearchOutcome }>()
-  const trimmedQuery = query.trim()
-  const isSearchable = trimmedQuery.length >= MINIMUM_QUERY_LENGTH
-
-  useEffect(() => {
-    if (!isSearchable) {
-      return
-    }
-
-    const controller = new AbortController()
-
-    const timer = setTimeout(() => {
-      searchTitles(trimmedQuery, controller.signal)
-        .then((response) => setSettled({ query: trimmedQuery, outcome: { phase: 'done', ...response } }))
-        .catch(() => {
-          if (!controller.signal.aborted) {
-            setSettled({ query: trimmedQuery, outcome: { phase: 'failed' } })
-          }
-        })
-    }, SEARCH_DELAY_MS)
-
-    return () => {
-      clearTimeout(timer)
-      controller.abort()
-    }
-  }, [trimmedQuery, isSearchable])
-
-  if (!isSearchable) {
-    return { phase: 'idle' }
-  }
-
-  return settled?.query === trimmedQuery ? settled.outcome : { phase: 'searching' }
-}
 
 const resultMeta = ({ type, year }: SearchResult) =>
   [MEDIA_TYPE_SINGULAR_LABELS[type], ...(year ? [year] : [])].join(COMMON_COPY.separator)
 
 const isSearchDown = (search: SearchState) =>
   search.phase === 'failed' ||
-  (search.phase === 'done' && search.results.length === 0 && search.unavailable.length > 0)
+  (search.phase === 'done' && !search.hasMore && search.results.length === 0 && search.unavailable.length > 0)
 
-function searchMessage({ results, unavailable }: SearchResponse) {
+function searchMessage({ results, unavailable, hasMore }: SearchResponse) {
   const hasResults = results.length > 0
   const isMissingSources = unavailable.length > 0
 
-  if (hasResults) {
+  if (hasResults || hasMore) {
     return isMissingSources ? ENTRY_COPY.sourcesMissing : undefined
   }
 
@@ -75,15 +35,16 @@ function searchMessage({ results, unavailable }: SearchResponse) {
 }
 
 type SearchStepProps = {
+  listType: TypeFilter
   onPickResult: (result: SearchResult) => void
   onOpenExisting: (entry: Entry) => void
   onManualEntry: (typedTitle: string) => void
   onClose: () => void
 }
 
-export function SearchStep({ onPickResult, onOpenExisting, onManualEntry, onClose }: SearchStepProps) {
+export function SearchStep({ listType, onPickResult, onOpenExisting, onManualEntry, onClose }: SearchStepProps) {
   const [query, setQuery] = useState('')
-  const search = useTitleSearch(query)
+  const { search, loadMore, retryLoadMore } = useTitleSearch(query, listType)
   const entries = useAllEntries()
 
   return (
@@ -104,6 +65,10 @@ export function SearchStep({ onPickResult, onOpenExisting, onManualEntry, onClos
             />
           </label>
 
+          <button type="button" className="manual-entry" onClick={() => onManualEntry(query.trim())}>
+            {isSearchDown(search) ? ENTRY_COPY.manualEntryWhenSearchIsDown : ENTRY_COPY.manualEntry}
+          </button>
+
           {search.phase === 'searching' && <p className="search-status">{ENTRY_COPY.searching}</p>}
           {search.phase === 'failed' && <p className="search-status">{ENTRY_COPY.searchUnavailable}</p>}
           {search.phase === 'done' && searchMessage(search) && (
@@ -116,7 +81,7 @@ export function SearchStep({ onPickResult, onOpenExisting, onManualEntry, onClos
 
               return (
                 <button
-                  key={`${result.source}-${result.sourceId}`}
+                  key={resultKey(result)}
                   type="button"
                   className="search-result"
                   onClick={() => (existing ? onOpenExisting(existing) : onPickResult(result))}
@@ -135,9 +100,9 @@ export function SearchStep({ onPickResult, onOpenExisting, onManualEntry, onClos
               )
             })}
 
-          <button type="button" className="manual-entry" onClick={() => onManualEntry(query.trim())}>
-            {isSearchDown(search) ? ENTRY_COPY.manualEntryWhenSearchIsDown : ENTRY_COPY.manualEntry}
-          </button>
+          {search.phase === 'done' && search.hasMore && (
+            <LoadMoreRow page={search.page} status={search.more} onLoadMore={loadMore} onRetry={retryLoadMore} />
+          )}
         </div>
       </IonContent>
     </>
