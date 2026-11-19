@@ -1,3 +1,5 @@
+import type { Status } from '../../domain/types'
+
 export const ENTRY_COPY = {
   editTitle: 'עריכת כותר',
   save: 'שמירה',
@@ -16,16 +18,23 @@ export const ENTRY_COPY = {
   titleField: 'שם',
   typeField: 'סוג',
   statusField: 'מצב',
-  howWasIt: 'איך היה?',
-  howWasItUntilThen: 'איך היה עד שם?',
+  ratingLegends: {
+    finished: 'איך היה?',
+    stopped: 'איך היה עד שם?',
+    ongoing: 'איך זה?',
+  } satisfies Record<Status, string>,
+  hoursPlayed: 'שעות משחק',
   seasonsWatched: 'עונות שראיתי',
   stoppedAtSeason: 'עצרתי בעונה',
-  noSeason: '—',
+  noValue: '—',
   oneSeasonLess: 'עונה אחת פחות',
   oneSeasonMore: 'עונה אחת יותר',
   whyStopped: 'למה עצרתי?',
-  whenFinished: 'מתי סיימתי?',
-  whenStopped: 'מתי עצרתי?',
+  dateLegends: {
+    finished: 'מתי סיימתי?',
+    stopped: 'מתי עצרתי?',
+    ongoing: 'מתי התחלתי?',
+  } satisfies Record<Status, string>,
   dateKind: 'סוג תאריך',
   exactDate: 'תאריך',
   yearOnly: 'רק שנה',

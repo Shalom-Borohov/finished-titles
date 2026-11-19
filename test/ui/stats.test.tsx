@@ -40,6 +40,25 @@ describe('stats', () => {
     renderAt('/tabs/stats')
 
     expect(await screen.findByText('3 כותרים · 2 סיימתי · 1 עצרתי')).toBeVisible()
+    expect(screen.queryByText(/שעות משחק/)).not.toBeInTheDocument()
+  })
+
+  it('adds the games still being played to the totals', async () => {
+    await db.entries.bulkAdd([entry(), entry({ status: 'stopped' }), entry({ type: 'game', status: 'ongoing' })])
+    renderAt('/tabs/stats')
+
+    expect(await screen.findByText('3 כותרים · 1 סיימתי · 1 עצרתי · 1 ממשיך')).toBeVisible()
+  })
+
+  it('adds up the hours played across games', async () => {
+    await db.entries.bulkAdd([
+      entry({ type: 'game', hours: 1200 }),
+      entry({ type: 'game', status: 'ongoing', hours: 40 }),
+      entry({ type: 'game' }),
+    ])
+    renderAt('/tabs/stats')
+
+    expect(await screen.findByText('1,240 שעות משחק')).toBeVisible()
   })
 
   it('shows every type with its count', async () => {

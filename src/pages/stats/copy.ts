@@ -1,8 +1,17 @@
 import { COMMON_COPY } from '../../copy/common'
+import type { LibraryStats } from '../../domain/stats'
+
+const HOURS_FORMAT = new Intl.NumberFormat('he-IL')
 
 export const STATS_COPY = {
-  summary: (total: number, finished: number, stopped: number) =>
-    [COMMON_COPY.titleCount(total), `${finished} סיימתי`, `${stopped} עצרתי`].join(COMMON_COPY.separator),
+  summary: ({ total, finished, stopped, ongoing }: LibraryStats) =>
+    [
+      COMMON_COPY.titleCount(total),
+      `${finished} סיימתי`,
+      `${stopped} עצרתי`,
+      ...(ongoing ? [`${ongoing} ממשיך`] : []),
+    ].join(COMMON_COPY.separator),
+  gameHours: (hours: number) => (hours === 1 ? 'שעת משחק אחת' : `${HOURS_FORMAT.format(hours)} שעות משחק`),
   byYear: 'לפי שנה',
   byType: 'לפי סוג',
   byRating: 'איך היה',

@@ -63,6 +63,10 @@ describe('verdictLabel', () => {
   it('shows stopped without a season', () => {
     expect(verdictLabel(entry({ type: 'book', status: 'stopped' }))).toBe('נעצר')
   })
+
+  it('shows that a game is still being played, whatever its rating', () => {
+    expect(verdictLabel(entry({ type: 'game', status: 'ongoing', rating: 'loved' }))).toBe('ממשיך')
+  })
 })
 
 describe('filterEntries', () => {
@@ -244,5 +248,17 @@ describe('normalizeEntry', () => {
     expect(normalizeEntry(entry({ type: 'book', status: 'stopped', genres: ['drama'] })).genres).toEqual(['drama'])
     expect(normalizeEntry(entry({ type: 'series', genres: [] })).genres).toEqual([])
     expect(normalizeEntry(entry({})).genres).toBeUndefined()
+  })
+
+  it('keeps the hours played only for games, whatever the status', () => {
+    expect(normalizeEntry(entry({ type: 'game', hours: 120 })).hours).toBe(120)
+    expect(normalizeEntry(entry({ type: 'game', status: 'stopped', hours: 8 })).hours).toBe(8)
+    expect(normalizeEntry(entry({ type: 'game', status: 'ongoing', hours: 900 })).hours).toBe(900)
+    expect(normalizeEntry(entry({ type: 'movie', hours: 3 })).hours).toBeUndefined()
+  })
+
+  it('keeps ongoing only for games, turning it into finished elsewhere', () => {
+    expect(normalizeEntry(entry({ type: 'game', status: 'ongoing' })).status).toBe('ongoing')
+    expect(normalizeEntry(entry({ type: 'comic', status: 'ongoing' })).status).toBe('finished')
   })
 })

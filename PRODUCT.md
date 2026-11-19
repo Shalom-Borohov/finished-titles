@@ -29,12 +29,13 @@ Logging is rare, roughly once per finished title, so the app is not a daily habi
 ## Capabilities and Constraints
 
 - Types: anime, series, movies, books, games, comics, and Other.
-- Status: finished or stopped. There is no in-progress or want-to-watch list.
+- Status: finished or stopped, and games can also be ongoing when they never end. There is no in-progress or want-to-watch list.
+- Games can record hours played.
 - Search fills in poster, year and type; manual entry is always available. Comics and Other are manual.
 - One entry per show, with an optional seasons-watched number. Stopped entries record why, and shows also record the season.
 - Rating words, optional: אהוב במיוחד, אהבתי מאוד, אהבתי, היה בסדר, לא אהבתי.
 - Optional note. Finish date is an exact date, a year, or blank.
-- A stats screen: totals by type, titles per year, rating breakdown, finished versus stopped.
+- A stats screen: totals by type, titles per year, rating breakdown, finished versus stopped, and total game hours.
 - Data lives on the device, with a JSON backup file. The list works offline; search needs a connection.
 - Hebrew UI, full RTL. Titles stay in English or romanized form, so every screen mixes RTL and LTR text.
 

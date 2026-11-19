@@ -70,7 +70,8 @@
   appearance: none;
 }
 
-.date-row {
+.date-row,
+.hours-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -82,13 +83,21 @@
   font-size: 0.9375rem;
 }
 
-.date-row input {
+.date-row input,
+.hours-row input {
   max-width: 60%;
   border: 0;
   background: none;
   color: var(--app-ink-soft);
   font: inherit;
   text-align: end;
+}
+
+.hours-row input {
+  width: 6ch;
+  padding: 0;
+  color: inherit;
+  font-weight: 700;
 }
 
 .form-problem {

@@ -10,14 +10,15 @@ import { useAllEntries } from '../../data/hooks'
 import { addEntry, deleteEntry, updateEntry } from '../../data/repo'
 import { findExisting } from '../../domain/entries'
 import { todayIso } from '../../domain/finishDate'
-import { type Entry, isShowType, STATUSES } from '../../domain/types'
+import { type Entry, isGameType, isShowType, statusesFor } from '../../domain/types'
 import { tmdbTitleId } from '../../search/client'
 import { TitleDetailsPage } from '../details/TitleDetailsPage'
 import { ENTRY_COPY } from './copy'
 import { DateFields, RatingPills, SeasonStepper } from './formFields'
 import { FormIdentity } from './FormIdentity'
 import { GenreField } from './GenreField'
-import { dateProblem, draftFromForm, type EntryFormState } from './formState'
+import { dateProblem, draftFromForm, type EntryFormState, withChanges } from './formState'
+import { HoursField } from './HoursField'
 import { MoreDetailsRow } from './MoreDetailsRow'
 import { useShowPrefill } from './useShowPrefill'
 import './entryForm.css'
@@ -39,9 +40,10 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
   const toast = useMessageToast()
   const entries = useAllEntries()
   const [today] = useState(todayIso)
-  const change = (changes: Partial<EntryFormState>) => setForm((current) => ({ ...current, ...changes }))
+  const change = (changes: Partial<EntryFormState>) => setForm((current) => withChanges(current, changes, today))
   const isStopped = form.status === 'stopped'
   const isShow = isShowType(form.type)
+  const isGame = isGameType(form.type)
   const problem = dateProblem(form, today)
   const hasTitle = form.title.trim() !== ''
   const duplicate = !editing && !isSaving && hasTitle ? findExisting(entries ?? [], form) : undefined
@@ -123,7 +125,7 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
 
             <Segmented
               label={ENTRY_COPY.statusField}
-              options={STATUSES}
+              options={statusesFor(form.type)}
               labels={STATUS_LABELS}
               selected={form.status}
               onSelect={(status) => change({ status })}
@@ -146,7 +148,7 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
             )}
 
             <RatingPills
-              legend={isStopped ? ENTRY_COPY.howWasItUntilThen : ENTRY_COPY.howWasIt}
+              legend={ENTRY_COPY.ratingLegends[form.status]}
               selected={form.rating}
               onSelect={(rating) => change({ rating })}
             />
@@ -159,8 +161,10 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
               />
             )}
 
+            {isGame && <HoursField hours={form.hours} onChange={(hours) => change({ hours })} />}
+
             <DateFields
-              legend={isStopped ? ENTRY_COPY.whenStopped : ENTRY_COPY.whenFinished}
+              legend={ENTRY_COPY.dateLegends[form.status]}
               form={form}
               today={today}
               problem={problem}

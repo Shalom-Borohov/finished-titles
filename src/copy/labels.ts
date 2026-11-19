@@ -55,10 +55,12 @@ export const GENRE_LABELS: Record<Genre, string> = {
 export const STATUS_LABELS: Record<Status, string> = {
   finished: 'סיימתי',
   stopped: 'עצרתי באמצע',
+  ongoing: 'ממשיך לשחק',
 }
 
 export const VERDICT_COPY = {
   stopped: 'נעצר',
+  ongoing: 'ממשיך',
   stoppedAtSeason: (season: number) => `נעצר בעונה ${season}`,
   seasons: (count: number) => `${count} עונות`,
 } as const

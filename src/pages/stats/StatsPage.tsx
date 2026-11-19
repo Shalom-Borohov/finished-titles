@@ -83,7 +83,8 @@ export function StatsPage() {
         <div className="page-body page-stack">
           <header className="stats-header">
             <h1 className="page-title">{COMMON_COPY.stats}</h1>
-            {stats && <p>{STATS_COPY.summary(stats.total, stats.finished, stats.stopped)}</p>}
+            {stats && <p>{STATS_COPY.summary(stats)}</p>}
+            {stats && stats.gameHours > 0 && <p>{STATS_COPY.gameHours(stats.gameHours)}</p>}
           </header>
           {stats && (
             <>
