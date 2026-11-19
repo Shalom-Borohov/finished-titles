@@ -1,6 +1,6 @@
 import type { EntryDraft } from '../../data/repo'
 import { finishYear, isFinishDate, isFutureFinishDate, isYearOnly } from '../../domain/finishDate'
-import type { Entry } from '../../domain/types'
+import { type Entry, fittingStatus } from '../../domain/types'
 import { ENTRY_COPY } from './copy'
 
 export const DATE_KINDS = ['exact', 'year', 'none'] as const
@@ -23,8 +23,10 @@ function dateKindOf(finishedOn: string | undefined): DateKind {
   return isYearOnly(finishedOn) ? 'year' : 'exact'
 }
 
+const todaysDate = (today: string): DateFields => ({ dateKind: 'exact', exactDate: today, yearText: String(finishYear(today)) })
+
 export function formFromDraft(draft: EntryDraft, today: string): EntryFormState {
-  return { ...draft, dateKind: 'exact', exactDate: today, yearText: String(finishYear(today)) }
+  return { ...draft, ...todaysDate(today) }
 }
 
 export function formFromEntry(entry: Entry, today: string): EntryFormState {
@@ -58,6 +60,15 @@ export function dateProblem(form: EntryFormState, today: string) {
   }
 
   return isFutureFinishDate(finishedOn, today) ? ENTRY_COPY.futureDate : undefined
+}
+
+const isOngoing = ({ status }: EntryFormState) => status === 'ongoing'
+
+export function withChanges(current: EntryFormState, changes: Partial<EntryFormState>, today: string): EntryFormState {
+  const changed = { ...current, ...changes }
+  const next = { ...changed, status: fittingStatus(changed.type, changed.status) }
+
+  return isOngoing(current) === isOngoing(next) ? next : { ...next, ...todaysDate(today) }
 }
 
 export function draftFromForm({ dateKind, exactDate, yearText, ...draft }: EntryFormState): EntryDraft {

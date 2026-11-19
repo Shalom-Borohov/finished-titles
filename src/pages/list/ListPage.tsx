@@ -61,16 +61,22 @@ function TitleList({ type, label }: { type: TypeFilter; label: string }) {
     setGenre(undefined)
   }
 
+  const countOf = (counted: Status) => ofType.filter((entry) => entry.status === counted).length
+  const ongoingCount = countOf('ongoing')
+
+  if (status === 'ongoing' && ongoingCount === 0) {
+    setStatus(ALL_STATUSES)
+  }
+
   const shown = sortNewestFirst(
     filterEntries(ofType, { type, status, query, rating: activeRating, genre: activeGenre }),
   )
-
-  const countOf = (counted: Status) => ofType.filter((entry) => entry.status === counted).length
 
   const statusPills: { filter: StatusFilter; text: string }[] = [
     { filter: ALL_STATUSES, text: LIST_COPY.all },
     { filter: 'finished', text: LIST_COPY.finished(countOf('finished')) },
     { filter: 'stopped', text: LIST_COPY.stopped(countOf('stopped')) },
+    ...(ongoingCount > 0 ? [{ filter: 'ongoing' as const, text: LIST_COPY.ongoing(ongoingCount) }] : []),
   ]
 
   return (

@@ -7,6 +7,8 @@ export type LibraryStats = {
   total: number
   finished: number
   stopped: number
+  ongoing: number
+  gameHours: number
   byType: { type: MediaType; count: number }[]
   byRating: { rating: Rating; count: number }[]
   byYear: { year: number; count: number }[]
@@ -36,6 +38,8 @@ export function buildStats(entries: Entry[]): LibraryStats {
     total: entries.length,
     finished: countWhere(({ status }) => status === 'finished'),
     stopped: countWhere(({ status }) => status === 'stopped'),
+    ongoing: countWhere(({ status }) => status === 'ongoing'),
+    gameHours: entries.reduce((sum, { hours }) => sum + (hours ?? 0), 0),
     byType: MEDIA_TYPES.map((type) => ({ type, count: countWhere((entry) => entry.type === type) })).toSorted(
       (first, second) => second.count - first.count,
     ),

@@ -3,8 +3,10 @@ import { RATING_LABELS, VERDICT_COPY } from '../copy/labels'
 import { finishYear, isYearOnly } from './finishDate'
 import {
   type Entry,
+  fittingStatus,
   GENRES,
   type Genre,
+  isGameType,
   isShowType,
   MEDIA_TYPES,
   type MediaType,
@@ -78,6 +80,10 @@ export function verdictLabel(entry: Entry) {
     return entry.stoppedSeason ? VERDICT_COPY.stoppedAtSeason(entry.stoppedSeason) : VERDICT_COPY.stopped
   }
 
+  if (entry.status === 'ongoing') {
+    return VERDICT_COPY.ongoing
+  }
+
   const parts = [
     ...(entry.rating ? [RATING_LABELS[entry.rating]] : []),
     ...(entry.seasons && entry.seasons > 1 ? [VERDICT_COPY.seasons(entry.seasons)] : []),
@@ -148,14 +154,17 @@ const withoutBlankText = (text: string | undefined) => text?.trim() || undefined
 export function normalizeEntry(entry: Entry): Entry {
   const isStopped = entry.status === 'stopped'
   const isShow = isShowType(entry.type)
+  const isGame = isGameType(entry.type)
 
   return {
     ...entry,
+    status: fittingStatus(entry.type, entry.status),
     title: entry.title.trim(),
     note: withoutBlankText(entry.note),
     endYear: isShow ? entry.endYear : undefined,
     seasons: isShow && !isStopped ? entry.seasons : undefined,
     stoppedSeason: isShow && isStopped ? entry.stoppedSeason : undefined,
     stopReason: isStopped ? withoutBlankText(entry.stopReason) : undefined,
+    hours: isGame ? entry.hours : undefined,
   }
 }

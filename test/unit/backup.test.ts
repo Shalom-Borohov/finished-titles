@@ -41,6 +41,17 @@ describe('backup', () => {
     expect(restored.map(({ genres }) => genres)).toEqual(expect.arrayContaining([['scifi', 'drama'], []]))
   })
 
+  it('keeps a game still being played and its hours through a round trip', async () => {
+    await addEntry({ title: 'Destiny 2', type: 'game', status: 'ongoing', hours: 1200, finishedOn: '2020' }, NOW)
+
+    const text = JSON.stringify(await exportBackup(NOW))
+
+    await resetDb()
+    await restoreBackup(parseBackup(text))
+
+    expect((await allEntries())[0]).toMatchObject({ status: 'ongoing', hours: 1200 })
+  })
+
   it('restores an old backup that has no genres, leaving them unset', async () => {
     await restoreBackup(parseBackup(backupText([{ id: 'a', title: 'Dune', type: 'movie', status: 'finished', createdAt: NOW, source: 'tmdb', sourceId: 'movie/438631' }])))
 
@@ -81,6 +92,8 @@ describe('backup', () => {
     ['a bad finish date', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, finishedOn: 'soon' }])],
     ['a blank title', backupText([{ id: 'a', title: '  ', type: 'movie', status: 'finished', createdAt: NOW }])],
     ['an unknown genre', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, genres: ['Drama'] }])],
+    ['zero hours', backupText([{ id: 'a', title: 'x', type: 'game', status: 'finished', createdAt: NOW, hours: 0 }])],
+    ['part of an hour', backupText([{ id: 'a', title: 'x', type: 'game', status: 'finished', createdAt: NOW, hours: 1.5 }])],
   ])('rejects %s', (_name, text) => {
     expect(() => parseBackup(text)).toThrow()
   })
@@ -93,6 +106,16 @@ describe('backup', () => {
     const [restored] = await allEntries()
 
     expect(restored.seasons).toBeUndefined()
+  })
+
+  it('normalises a hand-edited book that is ongoing or has hours', async () => {
+    const ongoingBook = { id: 'a', title: 'Dune', type: 'book', status: 'ongoing', createdAt: NOW, hours: 30 }
+
+    await restoreBackup(parseBackup(backupText([ongoingBook])))
+
+    const [restored] = await allEntries()
+
+    expect(restored).toMatchObject({ status: 'finished', hours: undefined })
   })
 
   it('keeps the list when a restore is not attempted after a bad file', async () => {

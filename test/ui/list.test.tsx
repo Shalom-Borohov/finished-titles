@@ -46,6 +46,35 @@ describe('type list', () => {
     await waitFor(() => expect(screen.queryByText('Done')).not.toBeInTheDocument())
     expect(screen.getByText('Dropped')).toBeVisible()
     expect(screen.getByRole('button', { name: 'סיימתי 1' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: /ממשיך/ })).not.toBeInTheDocument()
+  })
+
+  it('filters the games still being played, labelled as such', async () => {
+    await db.entries.bulkAdd([
+      entry({ title: 'Portal', type: 'game' }),
+      entry({ title: 'Destiny', type: 'game', status: 'ongoing' }),
+    ])
+    renderAt('/tabs/home/game')
+
+    fireEvent.click(await screen.findByRole('button', { name: 'ממשיך 1' }))
+
+    await waitFor(() => expect(screen.queryByText('Portal')).not.toBeInTheDocument())
+    expect(screen.getByText('Destiny')).toBeVisible()
+    expect(screen.getByText('ממשיך')).toBeVisible()
+  })
+
+  it('goes back to every status when the last game still being played is finished', async () => {
+    const ongoingGame = entry({ title: 'Destiny', type: 'game', status: 'ongoing' })
+
+    await db.entries.bulkAdd([entry({ title: 'Portal', type: 'game' }), ongoingGame])
+    renderAt('/tabs/home/game')
+    fireEvent.click(await screen.findByRole('button', { name: 'ממשיך 1' }))
+    await waitFor(() => expect(screen.queryByText('Portal')).not.toBeInTheDocument())
+
+    await db.entries.put({ ...ongoingGame, status: 'finished' })
+
+    expect(await screen.findByText('Portal')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'הכל' })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('searches inside the list', async () => {

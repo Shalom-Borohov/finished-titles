@@ -59,7 +59,7 @@ export function SeasonStepper({ label, season, onChange }: SeasonStepperProps) {
         <button type="button" className="icon-button" aria-label={ENTRY_COPY.oneSeasonLess} disabled={!season} onClick={lower}>
           <MinusIcon />
         </button>
-        <span className="stepper-count">{season ?? ENTRY_COPY.noSeason}</span>
+        <span className="stepper-count">{season ?? ENTRY_COPY.noValue}</span>
         <button
           type="button"
           className="icon-button"

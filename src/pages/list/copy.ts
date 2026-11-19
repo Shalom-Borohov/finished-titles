@@ -6,6 +6,7 @@ export const LIST_COPY = {
   all: 'הכל',
   finished: (count: number) => `סיימתי ${count}`,
   stopped: (count: number) => `עצרתי ${count}`,
+  ongoing: (count: number) => `ממשיך ${count}`,
   ratingFilter: 'סינון לפי דירוג',
   allRatings: 'כל הדירוגים',
   genreFilter: 'סינון לפי ז׳אנר',
