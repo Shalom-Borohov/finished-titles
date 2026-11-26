@@ -20,7 +20,7 @@ import {
   unknown,
 } from 'valibot'
 import { isFinishDate } from '../domain/finishDate'
-import { posterUrlSchema, SEARCH_SOURCES, SEARCHABLE_TYPES } from '../domain/types'
+import { MINIMUM_MINUTES, posterUrlSchema, SEARCH_SOURCES, SEARCHABLE_TYPES } from '../domain/types'
 
 const searchResultSchema = object({
   source: picklist(SEARCH_SOURCES),
@@ -53,6 +53,10 @@ const showPrefillSchema = object({
   endYear: optional(pipe(number(), integer())),
 })
 
+const lengthSchema = object({
+  minutes: optional(pipe(number(), integer(), minValue(MINIMUM_MINUTES))),
+})
+
 const minutesSchema = pipe(number(), integer(), minValue(1))
 
 const namesSchema = optional(array(string()), [])
@@ -80,6 +84,8 @@ export type SearchResult = SearchResponse['results'][number]
 
 export type ShowPrefill = InferOutput<typeof showPrefillSchema>
 
+export type Length = InferOutput<typeof lengthSchema>
+
 export type TitleDetails = InferOutput<typeof titleDetailsSchema>
 
 async function fetchFromSearchService(path: string, signal: AbortSignal): Promise<unknown> {
@@ -106,13 +112,13 @@ export async function searchTitles(query: string, page: number, signal: AbortSig
 
 const tmdbTitleMatch = (titleId: string) => TMDB_TITLE_ID.exec(titleId)
 
-export const isTmdbShowId = (titleId: string) => tmdbTitleMatch(titleId)?.[1] === TMDB_SHOW_KIND
+export function tvIdOfTitle(titleId: string) {
+  const match = tmdbTitleMatch(titleId)
 
-export function tmdbTvId({ source, sourceId }: SearchResult) {
-  const match = tmdbTitleMatch(sourceId)
-
-  return source === 'tmdb' && match?.[1] === TMDB_SHOW_KIND ? match[2] : undefined
+  return match?.[1] === TMDB_SHOW_KIND ? match[2] : undefined
 }
+
+export const isTmdbShowId = (titleId: string) => tvIdOfTitle(titleId) !== undefined
 
 export function tmdbTitleId({ source, sourceId }: Partial<Pick<SearchResult, 'source' | 'sourceId'>>) {
   return source === 'tmdb' && sourceId && tmdbTitleMatch(sourceId) ? sourceId : undefined
@@ -128,4 +134,14 @@ export async function fetchTitleDetails(titleId: string, signal: AbortSignal): P
   const path = `/details?title=${encodeURIComponent(titleId)}`
 
   return parse(titleDetailsSchema, await fetchFromSearchService(path, signal))
+}
+
+export async function fetchLength(titleId: string, season: number | undefined, signal: AbortSignal): Promise<Length> {
+  const query = new URLSearchParams({ title: titleId })
+
+  if (season !== undefined) {
+    query.set('season', String(season))
+  }
+
+  return parse(lengthSchema, await fetchFromSearchService(`/length?${query}`, signal))
 }

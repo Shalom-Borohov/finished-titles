@@ -16,3 +16,7 @@ export async function parseUpstreamJson<Output>(
 export function isUsableTitle(title: string | null | undefined): title is string {
   return Boolean(title?.trim())
 }
+
+export function isPositiveInteger(value: number | null | undefined): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value > 0
+}

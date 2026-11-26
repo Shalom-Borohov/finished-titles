@@ -2,10 +2,10 @@ import { useIonViewDidEnter, useIonViewDidLeave } from '@ionic/react'
 import { useEffect, useRef, useState } from 'react'
 import { TagIcon } from '../../components/icons'
 import { useAllEntries } from '../../data/hooks'
-import { awaitingGenres } from '../../domain/entries'
+import { awaitingTmdbFill } from '../../domain/entries'
 import type { Entry } from '../../domain/types'
 import { SETTINGS_COPY } from './copy'
-import { fillGenres, type GenreFillResult } from './genreFill'
+import { fillFromTmdb, type TmdbFillResult } from './tmdbFill'
 
 const FULL_WIDTH_PERCENT = 100
 
@@ -13,26 +13,26 @@ type FillProgress = { done: number; total: number }
 
 function FillProgressBar({ done, total }: FillProgress) {
   return (
-    <div className="genre-fill-progress">
-      <span>{SETTINGS_COPY.fillingGenres(done, total)}</span>
+    <div className="tmdb-fill-progress">
+      <span>{SETTINGS_COPY.filling(done, total)}</span>
       <div
-        className="genre-fill-track"
+        className="tmdb-fill-track"
         role="progressbar"
-        aria-label={SETTINGS_COPY.genreFillProgress}
+        aria-label={SETTINGS_COPY.tmdbFillProgress}
         aria-valuemin={0}
         aria-valuemax={total}
         aria-valuenow={done}
       >
-        <div className="genre-fill-bar" style={{ width: `${(done / total) * FULL_WIDTH_PERCENT}%` }} />
+        <div className="tmdb-fill-bar" style={{ width: `${(done / total) * FULL_WIDTH_PERCENT}%` }} />
       </div>
     </div>
   )
 }
 
-export function GenreFillSettings() {
+export function TmdbFillSettings() {
   const entries = useAllEntries()
   const [progress, setProgress] = useState<FillProgress>()
-  const [result, setResult] = useState<GenreFillResult>()
+  const [result, setResult] = useState<TmdbFillResult>()
   const runController = useRef<AbortController>(undefined)
   const isInView = useRef(true)
 
@@ -45,7 +45,7 @@ export function GenreFillSettings() {
     setResult(undefined)
   })
 
-  const waiting = entries && awaitingGenres(entries)
+  const waiting = entries && awaitingTmdbFill(entries)
   const shownResult = result && result.failed === waiting?.length ? result : undefined
 
   if (!waiting || (waiting.length === 0 && !progress && !shownResult)) {
@@ -58,7 +58,7 @@ export function GenreFillSettings() {
     runController.current = controller
     setProgress({ done: 0, total: titles.length })
 
-    const outcome = await fillGenres(titles, (done) => setProgress({ done, total: titles.length }), controller.signal)
+    const outcome = await fillFromTmdb(titles, (done) => setProgress({ done, total: titles.length }), controller.signal)
 
     setProgress(undefined)
 
@@ -67,15 +67,15 @@ export function GenreFillSettings() {
     }
   }
 
-  const actionLabel = shownResult ? SETTINGS_COPY.retryGenres(shownResult.failed) : SETTINGS_COPY.fillGenres
+  const actionLabel = shownResult ? SETTINGS_COPY.retryTmdbFill(shownResult.failed) : SETTINGS_COPY.fillFromTmdb
 
   const note = shownResult
-    ? SETTINGS_COPY.genresFilled(shownResult.filled, shownResult.failed)
-    : SETTINGS_COPY.genresWaiting(progress ? progress.total : waiting.length)
+    ? SETTINGS_COPY.tmdbFilled(shownResult.filled, shownResult.failed)
+    : SETTINGS_COPY.tmdbFillWaiting(progress ? progress.total : waiting.length)
 
   return (
     <section className="card">
-      <h2>{SETTINGS_COPY.genres}</h2>
+      <h2>{SETTINGS_COPY.tmdbFill}</h2>
       {progress && <FillProgressBar {...progress} />}
       {!progress && waiting.length > 0 && (
         <button type="button" className="settings-action" onClick={() => void fill(waiting)}>

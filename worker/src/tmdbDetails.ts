@@ -1,5 +1,4 @@
-import type { GenericSchema } from 'valibot'
-import { authorizedHeaders, isFullDate, TMDB_URL } from './tmdb'
+import { authorizedHeaders, isFullDate, TV_REFERENCE_PREFIX, tmdbJson } from './tmdb'
 import {
   aggregateCreditsSchema,
   movieCreditsSchema,
@@ -12,18 +11,13 @@ import {
   watchProvidersSchema,
 } from './tmdbDetailsSchemas'
 import type { Env, TitleDetails } from './types'
-import { isUsableTitle, parseUpstreamJson } from './upstream'
+import { isPositiveInteger, isUsableTitle } from './upstream'
 
 const MAX_CAST = 5
-const TV_REFERENCE_PREFIX = 'tv/'
 const DIRECTOR_JOB = 'Director'
 
 function isNamedGenre(genre: TmdbGenre): genre is TitleDetails['genres'][number] {
   return typeof genre.id === 'number' && isUsableTitle(genre.name)
-}
-
-function isPositiveInteger(value: number | null | undefined): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value > 0
 }
 
 function namesOf(people: { name?: string | null }[]) {
@@ -47,10 +41,6 @@ function israeliStreamers(providers: TmdbWatchProviders) {
     .toSorted((first, second) => first.display_priority - second.display_priority)
     .map(({ provider_name }) => provider_name)
     .filter(isUsableTitle)
-}
-
-async function tmdbJson<Output>(path: string, headers: HeadersInit, schema: GenericSchema<unknown, Output>) {
-  return parseUpstreamJson(await fetch(`${TMDB_URL}/${path}`, { headers }), schema)
 }
 
 async function tvDetails(reference: string, headers: HeadersInit): Promise<TitleDetails> {

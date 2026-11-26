@@ -2,6 +2,14 @@ import type { Release } from './releases'
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.2.0',
+    features: [
+      'בסטטיסטיקה: סך השעות, ולצד כל סוג כמה שעות הוא לקח',
+      'כותר מ-TMDB שומר את האורך שלו, ובהגדרות אפשר להשלים אורכים לכותרים שכבר ברשימה',
+    ],
+    fixes: [],
+  },
+  {
     version: '1.1.1',
     features: [],
     fixes: ['טופס שנשאר פתוח אחרי חצות מקבל עכשיו את התאריך של היום'],

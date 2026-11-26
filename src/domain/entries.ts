@@ -124,8 +124,10 @@ export function offeredGenres(entries: Entry[]): Genre[] {
   return GENRES.filter((genre) => tagged.has(genre))
 }
 
-export function awaitingGenres(entries: Entry[]) {
-  return entries.filter(({ source, genres }) => source === 'tmdb' && genres === undefined)
+export function awaitingTmdbFill(entries: Entry[]) {
+  return entries.filter(
+    ({ source, genres, lengthMinutes }) => source === 'tmdb' && (genres === undefined || lengthMinutes === undefined),
+  )
 }
 
 export function homeTiles(entries: Entry[]): HomeTile[] {

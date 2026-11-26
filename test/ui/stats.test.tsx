@@ -40,7 +40,7 @@ describe('stats', () => {
     renderAt('/tabs/stats')
 
     expect(await screen.findByText('3 כותרים · 2 סיימתי · 1 עצרתי')).toBeVisible()
-    expect(screen.queryByText(/שעות משחק/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/שעות|שעה/)).not.toBeInTheDocument()
   })
 
   it('adds the games still being played to the totals', async () => {
@@ -50,15 +50,37 @@ describe('stats', () => {
     expect(await screen.findByText('3 כותרים · 1 סיימתי · 1 עצרתי · 1 ממשיך')).toBeVisible()
   })
 
-  it('adds up the hours played across games', async () => {
+  it('adds up the hours spent across every type', async () => {
     await db.entries.bulkAdd([
       entry({ type: 'game', hours: 1200 }),
-      entry({ type: 'game', status: 'ongoing', hours: 40 }),
+      entry({ type: 'game', status: 'ongoing', hours: 20 }),
       entry({ type: 'game' }),
+      entry({ type: 'movie', lengthMinutes: [1200] }),
     ])
     renderAt('/tabs/stats')
 
-    expect(await screen.findByText('1,240 שעות משחק')).toBeVisible()
+    expect(await screen.findByText('1,240 שעות')).toBeVisible()
+  })
+
+  it('says one hour when the titles add up to exactly one', async () => {
+    await db.entries.bulkAdd([entry({ type: 'movie', lengthMinutes: [60] })])
+    renderAt('/tabs/stats')
+
+    expect(await screen.findByText('שעה אחת')).toBeVisible()
+  })
+
+  it('shows the hours beside the count of a type that has them', async () => {
+    await db.entries.bulkAdd([
+      entry({ type: 'anime', lengthMinutes: [30000] }),
+      entry({ type: 'anime', lengthMinutes: [19200] }),
+      entry({ type: 'comic' }),
+    ])
+    renderAt('/tabs/stats')
+
+    const types = await section('לפי סוג')
+
+    await waitFor(() => expect(countBeside(types.getByText('אנימה'))).toBe('2 · 820 שעות'))
+    expect(countBeside(types.getByText('קומיקס'))).toBe('1')
   })
 
   it('shows every type with its count', async () => {

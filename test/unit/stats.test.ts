@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { buildStats } from '../../src/domain/stats'
+import { buildStats, type LibraryStats } from '../../src/domain/stats'
+import type { MediaType } from '../../src/domain/types'
 import { entry } from '../helpers/entries'
+
+const hoursOf = (byType: LibraryStats['byType'], type: MediaType) => byType.find((row) => row.type === type)?.hours
 
 describe('buildStats', () => {
   it('counts totals by status', () => {
@@ -13,11 +16,47 @@ describe('buildStats', () => {
     const { byType } = buildStats([entry({ type: 'book' }), entry({ type: 'anime' }), entry({ type: 'anime' })])
 
     expect(byType.slice(0, 3)).toEqual([
-      { type: 'anime', count: 2 },
-      { type: 'book', count: 1 },
-      { type: 'series', count: 0 },
+      { type: 'anime', count: 2, hours: 0 },
+      { type: 'book', count: 1, hours: 0 },
+      { type: 'series', count: 0, hours: 0 },
     ])
     expect(byType).toHaveLength(7)
+  })
+
+  it('adds up the hours spent on each type', () => {
+    const { byType } = buildStats([
+      entry({ type: 'movie', lengthMinutes: [120] }),
+      entry({ type: 'movie', lengthMinutes: [180] }),
+      entry({ type: 'series', seasons: 1, lengthMinutes: [600, 700] }),
+      entry({ type: 'book' }),
+    ])
+
+    expect(hoursOf(byType, 'movie')).toBe(5)
+    expect(hoursOf(byType, 'series')).toBe(10)
+    expect(hoursOf(byType, 'book')).toBe(0)
+  })
+
+  it('rounds the hours of a type once, not each title', () => {
+    const { byType } = buildStats([entry({ lengthMinutes: [20] }), entry({ lengthMinutes: [20] })])
+
+    expect(hoursOf(byType, 'movie')).toBe(1)
+  })
+
+  it('totals the hours as the sum of the rounded rows', () => {
+    const { byType, hours } = buildStats([entry({ lengthMinutes: [90] }), entry({ type: 'series', lengthMinutes: [90] })])
+
+    expect([hoursOf(byType, 'movie'), hoursOf(byType, 'series'), hours]).toEqual([2, 2, 4])
+  })
+
+  it('counts the hours played in the games row and in the total', () => {
+    const { byType, hours } = buildStats([
+      entry({ type: 'game', hours: 3 }),
+      entry({ type: 'game', status: 'ongoing', hours: 5 }),
+      entry({ lengthMinutes: [120] }),
+    ])
+
+    expect(hoursOf(byType, 'game')).toBe(8)
+    expect(hours).toBe(10)
   })
 
   it('lists every rating in order, and leaves unrated entries out of it', () => {

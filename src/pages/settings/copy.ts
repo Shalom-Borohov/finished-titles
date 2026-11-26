@@ -6,15 +6,15 @@ export const SETTINGS_COPY = {
   backup: 'גיבוי',
   storageNote: 'הרשימה שמורה רק בטלפון הזה. כדאי לייצא גיבוי מדי פעם.',
   backupRestored: 'הגיבוי שוחזר',
-  genres: 'ז׳אנרים',
-  fillGenres: 'השלמת ז׳אנרים מ-TMDB',
-  genresWaiting: (count: number) =>
+  tmdbFill: 'השלמה מ-TMDB',
+  fillFromTmdb: 'השלמת ז׳אנרים ואורכים',
+  tmdbFillWaiting: (count: number) =>
     count === 1
-      ? 'לכותר אחד מ-TMDB עדיין אין ז׳אנרים, ולכן הסינון לפי ז׳אנר לא מוצא אותו.'
-      : `ל-${count} כותרים מ-TMDB עדיין אין ז׳אנרים, ולכן הסינון לפי ז׳אנר לא מוצא אותם.`,
-  fillingGenres: (done: number, total: number) => `משלים… ${done} מתוך ${total}`,
-  genreFillProgress: 'התקדמות השלמת הז׳אנרים',
-  genresFilled: (filled: number, failed: number) => {
+      ? 'לכותר אחד מ-TMDB חסרים ז׳אנרים או אורך, ולכן הסינון לפי ז׳אנר והשעות בסטטיסטיקה לא כוללים אותו.'
+      : `ל-${count} כותרים מ-TMDB חסרים ז׳אנרים או אורך, ולכן הסינון לפי ז׳אנר והשעות בסטטיסטיקה לא כוללים אותם.`,
+  filling: (done: number, total: number) => `משלים… ${done} מתוך ${total}`,
+  tmdbFillProgress: 'התקדמות ההשלמה מ-TMDB',
+  tmdbFilled: (filled: number, failed: number) => {
     const filledLine = filled === 1 ? 'הושלם כותר אחד.' : `הושלמו ${filled} כותרים.`
 
     if (failed === 0) {
@@ -25,7 +25,7 @@ export const SETTINGS_COPY = {
 
     return filled === 0 ? failedLine : `${filledLine} ${failedLine}`
   },
-  retryGenres: (count: number) => (count === 1 ? 'ניסיון חוזר לכותר אחד' : `ניסיון חוזר ל-${count} כותרים`),
+  retryTmdbFill: (count: number) => (count === 1 ? 'ניסיון חוזר לכותר אחד' : `ניסיון חוזר ל-${count} כותרים`),
   feedback: 'משוב',
   reportBugOrIdea: 'דיווח על באג / הצעה',
   report: 'דיווח',

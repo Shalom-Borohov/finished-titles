@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { searchTitles } from '../../src/search/client'
+import { fetchLength, searchTitles } from '../../src/search/client'
 import {
   DUNE,
   jsonReply,
+  lengthCalls,
   SEARCH_URL,
   searchPageReply,
   SEVERANCE,
@@ -54,5 +55,48 @@ describe('searchTitles', () => {
     const { hasMore } = await searchTitles('dune', 1, new AbortController().signal)
 
     expect(hasMore).toBe(false)
+  })
+})
+
+describe('fetchLength', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.unstubAllEnvs()
+  })
+
+  it('asks for the length of a movie', async () => {
+    const fetchStub = stubSearchResults([], { lengthReply: jsonReply({ minutes: 155 }) })
+
+    expect(await fetchLength(DUNE.sourceId, undefined, new AbortController().signal)).toEqual({ minutes: 155 })
+    expect(lengthCalls(fetchStub)).toEqual([`${SEARCH_URL}/length?title=movie%2F438631`])
+  })
+
+  it('asks for the length of one season of a show, which may be zero', async () => {
+    const fetchStub = stubSearchResults([], { lengthReply: jsonReply({ minutes: 0 }) })
+
+    expect(await fetchLength(SEVERANCE.sourceId, 2, new AbortController().signal)).toEqual({ minutes: 0 })
+    expect(lengthCalls(fetchStub)).toEqual([`${SEARCH_URL}/length?title=tv%2F95396&season=2`])
+  })
+
+  it('accepts a reply without minutes, when TMDB has no length', async () => {
+    stubSearchResults([], { lengthReply: jsonReply({}) })
+
+    expect(await fetchLength(DUNE.sourceId, undefined, new AbortController().signal)).toEqual({})
+  })
+
+  it.each([
+    ['negative minutes', { minutes: -1 }],
+    ['part of a minute', { minutes: 90.5 }],
+    ['minutes written as text', { minutes: '90' }],
+  ])('rejects %s', async (_name, reply) => {
+    stubSearchResults([], { lengthReply: jsonReply(reply) })
+
+    await expect(fetchLength(DUNE.sourceId, undefined, new AbortController().signal)).rejects.toThrow()
+  })
+
+  it('rejects a failed lookup', async () => {
+    stubSearchResults([])
+
+    await expect(fetchLength(DUNE.sourceId, undefined, new AbortController().signal)).rejects.toThrow()
   })
 })

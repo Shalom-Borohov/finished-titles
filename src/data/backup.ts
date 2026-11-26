@@ -6,7 +6,7 @@ import { allEntries } from './repo'
 
 const FIRST_BACKUP_VERSION = 1
 
-const BACKUP_VERSION = 2
+const BACKUP_VERSION = 3
 
 const hasUniqueIds = (entries: Entry[]) => new Set(entries.map(({ id }) => id)).size === entries.length
 

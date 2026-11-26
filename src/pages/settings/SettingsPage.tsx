@@ -7,7 +7,7 @@ import { COMMON_COPY } from '../../copy/common'
 import { type Backup, restoreBackup } from '../../data/backup'
 import { SETTINGS_COPY } from './copy'
 import { FeedbackSettings } from './FeedbackSettings'
-import { GenreFillSettings } from './GenreFillSettings'
+import { TmdbFillSettings } from './TmdbFillSettings'
 import { VersionSettings } from './VersionSettings'
 import './settings.css'
 
@@ -77,7 +77,7 @@ export function SettingsPage() {
             <p className="settings-note">{SETTINGS_COPY.storageNote}</p>
           </section>
 
-          <GenreFillSettings />
+          <TmdbFillSettings />
 
           <FeedbackSettings />
 

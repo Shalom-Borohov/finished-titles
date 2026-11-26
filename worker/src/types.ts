@@ -34,6 +34,8 @@ export type TitleDetails = {
   watchInIsrael: string[]
 }
 
+export type TitleLength = { minutes?: number }
+
 export type Env = {
   ALLOWED_ORIGINS: string
   TMDB_TOKEN?: string

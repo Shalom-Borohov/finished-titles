@@ -25,6 +25,7 @@ export type SearchReply = (request: URL) => Promise<Response>
 type OtherReplies = {
   seasonsReply?: () => Promise<Response>
   detailsReply?: (url: string) => Promise<Response>
+  lengthReply?: (url: string) => Promise<Response>
 }
 
 type StubOptions = OtherReplies & { unavailable?: string[] }
@@ -34,6 +35,8 @@ const SEARCH_PAGES_URL = `${SEARCH_URL}/search`
 const SEASONS_URL = `${SEARCH_URL}/seasons`
 
 const DETAILS_URL = `${SEARCH_URL}/details`
+
+const LENGTH_URL = `${SEARCH_URL}/length`
 
 const notFound = async () => new Response(null, { status: 404 })
 
@@ -80,13 +83,17 @@ export function holdingPage(heldPage: number, reply: SearchReply) {
 
 export function stubSearchPages(
   searchReply: SearchReply,
-  { seasonsReply = notFound, detailsReply = notFound }: OtherReplies = {},
+  { seasonsReply = notFound, detailsReply = notFound, lengthReply = notFound }: OtherReplies = {},
 ) {
   const fetchStub = vi.fn<typeof fetch>().mockImplementation(async (input) => {
     const url = String(input)
 
     if (url.startsWith(SEASONS_URL)) {
       return seasonsReply()
+    }
+
+    if (url.startsWith(LENGTH_URL)) {
+      return lengthReply(url)
     }
 
     return url.startsWith(DETAILS_URL) ? detailsReply(url) : searchReply(new URL(url))
@@ -111,6 +118,8 @@ export const searchCalls = (fetchStub: FetchStub) => callsTo(fetchStub, SEARCH_P
 export const seasonsCalls = (fetchStub: FetchStub) => callsTo(fetchStub, SEASONS_URL)
 
 export const detailsCalls = (fetchStub: FetchStub) => callsTo(fetchStub, DETAILS_URL)
+
+export const lengthCalls = (fetchStub: FetchStub) => callsTo(fetchStub, LENGTH_URL)
 
 export function stubSearchFailure() {
   vi.stubEnv('VITE_SEARCH_URL', SEARCH_URL)
