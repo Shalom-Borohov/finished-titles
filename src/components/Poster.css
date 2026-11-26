@@ -16,6 +16,10 @@
   object-fit: cover;
 }
 
+.poster img[hidden] {
+  display: none;
+}
+
 .poster-placeholder {
   display: flex;
   align-items: flex-end;
