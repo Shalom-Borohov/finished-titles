@@ -3,6 +3,12 @@ import type { MoreStatus } from '../../search/pages'
 import { ENTRY_COPY } from './copy'
 import { useIsVisible } from './useIsVisible'
 
+const MORE_STATUS_MESSAGES: Record<MoreStatus, string | undefined> = {
+  idle: undefined,
+  loading: ENTRY_COPY.loadingMore,
+  failed: ENTRY_COPY.loadMoreFailed,
+}
+
 type LoadMoreRowProps = {
   page: number
   status: MoreStatus
@@ -22,14 +28,13 @@ export function LoadMoreRow({ page, status, onLoadMore, onRetry }: LoadMoreRowPr
 
   return (
     <div ref={endRef} className="load-more">
-      {status === 'loading' && <p className="search-status">{ENTRY_COPY.loadingMore}</p>}
+      <p className="search-status" role="status">
+        {MORE_STATUS_MESSAGES[status]}
+      </p>
       {status === 'failed' && (
-        <>
-          <p className="search-status">{ENTRY_COPY.loadMoreFailed}</p>
-          <button type="button" className="load-more-retry" onClick={onRetry}>
-            {ENTRY_COPY.retryLoadMore}
-          </button>
-        </>
+        <button type="button" className="load-more-retry" onClick={onRetry}>
+          {ENTRY_COPY.retryLoadMore}
+        </button>
       )}
     </div>
   )

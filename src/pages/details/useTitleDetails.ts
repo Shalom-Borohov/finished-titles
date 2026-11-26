@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchTitleDetails, type TitleDetails } from '../../search/client'
 
-type TitleDetailsState = { kind: 'loading' } | { kind: 'failed' } | { kind: 'loaded'; details: TitleDetails }
+export type TitleDetailsState = { kind: 'loading' } | { kind: 'failed' } | { kind: 'loaded'; details: TitleDetails }
 
 export function useTitleDetails(titleId: string) {
   const [state, setState] = useState<TitleDetailsState>({ kind: 'loading' })

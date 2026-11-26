@@ -23,7 +23,7 @@ const isSearchDown = (search: SearchState) =>
   search.phase === 'failed' ||
   (search.phase === 'done' && !search.hasMore && search.results.length === 0 && search.unavailable.length > 0)
 
-function searchMessage({ results, unavailable, hasMore }: SearchResponse) {
+function pageMessage({ results, unavailable, hasMore }: SearchResponse) {
   const hasResults = results.length > 0
   const isMissingSources = unavailable.length > 0
 
@@ -32,6 +32,18 @@ function searchMessage({ results, unavailable, hasMore }: SearchResponse) {
   }
 
   return isMissingSources ? ENTRY_COPY.searchUnavailable : ENTRY_COPY.noResults
+}
+
+function searchMessage(search: SearchState) {
+  if (search.phase === 'searching') {
+    return ENTRY_COPY.searching
+  }
+
+  if (search.phase === 'failed') {
+    return ENTRY_COPY.searchUnavailable
+  }
+
+  return search.phase === 'done' ? pageMessage(search) : undefined
 }
 
 type SearchStepProps = {
@@ -69,15 +81,13 @@ export function SearchStep({ listType, onPickResult, onOpenExisting, onManualEnt
             {isSearchDown(search) ? ENTRY_COPY.manualEntryWhenSearchIsDown : ENTRY_COPY.manualEntry}
           </button>
 
-          {search.phase === 'searching' && <p className="search-status">{ENTRY_COPY.searching}</p>}
-          {search.phase === 'failed' && <p className="search-status">{ENTRY_COPY.searchUnavailable}</p>}
-          {search.phase === 'done' && searchMessage(search) && (
-            <p className="search-status">{searchMessage(search)}</p>
-          )}
+          <p className="search-status" role="status">
+            {searchMessage(search)}
+          </p>
 
           {search.phase === 'done' &&
             search.results.map((result) => {
-              const existing = findExisting(entries ?? [], result)
+              const existing = findExisting(entries ?? [], { ...result, releaseYear: result.year })
 
               return (
                 <button

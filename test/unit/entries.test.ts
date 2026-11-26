@@ -93,6 +93,37 @@ describe('filterEntries', () => {
   })
 })
 
+describe('filterEntries search folding', () => {
+  const entries = [
+    entry({ title: 'Shōgun', type: 'series' }),
+    entry({ title: 'Spider-Man: No Way Home', type: 'movie' }),
+    entry({ title: 'צ׳ארלי ואנדרסון', type: 'series' }),
+    entry({ title: 'דוד ״הגדול״', type: 'book' }),
+    entry({ title: 'Mr. Robot', type: 'series' }),
+    entry({ title: 'Love, Death + Robots', type: 'series' }),
+  ]
+
+  const searched = (query: string) => titles(filterEntries(entries, { type: 'all', status: 'all', query }))
+
+  it('ignores accents', () => {
+    expect(searched('shogun')).toEqual(['Shōgun'])
+  })
+
+  it('ignores hyphens, spaces and punctuation on both sides', () => {
+    expect(searched('spiderman nowayhome')).toEqual(['Spider-Man: No Way Home'])
+    expect(searched('mr robot')).toEqual(['Mr. Robot'])
+  })
+
+  it('ignores symbols such as a plus sign', () => {
+    expect(searched('love death robots')).toEqual(['Love, Death + Robots'])
+  })
+
+  it('treats a Hebrew geresh or gershayim like a plain quote or apostrophe', () => {
+    expect(searched("צ'ארלי")).toEqual(['צ׳ארלי ואנדרסון'])
+    expect(searched('"הגדול"')).toEqual(['דוד ״הגדול״'])
+  })
+})
+
 describe('filterEntries by rating and genre', () => {
   const entries = [
     entry({ title: 'Dune', rating: 'favorite', genres: ['scifi', 'drama'] }),
@@ -204,10 +235,28 @@ describe('findExisting', () => {
     expect(findExisting([notes], { title: 'My Comic', type: 'book' })).toBeUndefined()
   })
 
-  it('matches a search result to a title that was added by hand', () => {
-    const manual = entry({ title: 'arrival', type: 'movie' })
+  const dune1984 = { title: 'Dune', type: 'movie', source: 'tmdb', sourceId: 'movie/841', releaseYear: 1984 } as const
 
-    expect(findExisting([manual], { title: 'Arrival', type: 'movie', source: 'tmdb', sourceId: '329865' })).toBe(manual)
+  it('does not match a search result to a title added by hand without a year', () => {
+    expect(findExisting([entry({ title: 'Dune', type: 'movie' })], dune1984)).toBeUndefined()
+  })
+
+  it('matches a search result to a title added by hand with the same release year', () => {
+    const manual = entry({ title: 'arrival', type: 'movie', releaseYear: 2016 })
+
+    expect(
+      findExisting([manual], {
+        title: 'Arrival',
+        type: 'movie',
+        source: 'tmdb',
+        sourceId: 'movie/329865',
+        releaseYear: 2016,
+      }),
+    ).toBe(manual)
+  })
+
+  it('does not match a title added by hand with another release year', () => {
+    expect(findExisting([entry({ title: 'Dune', type: 'movie', releaseYear: 2021 })], dune1984)).toBeUndefined()
   })
 })
 
