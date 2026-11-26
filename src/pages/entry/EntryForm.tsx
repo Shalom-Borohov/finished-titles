@@ -9,7 +9,6 @@ import { STATUS_LABELS } from '../../copy/labels'
 import { useAllEntries } from '../../data/hooks'
 import { addEntry, deleteEntry, updateEntry } from '../../data/repo'
 import { findExisting } from '../../domain/entries'
-import { todayIso } from '../../domain/finishDate'
 import { type Entry, isGameType, isShowType, statusesFor } from '../../domain/types'
 import { tmdbTitleId } from '../../search/client'
 import { TitleDetailsPage } from '../details/TitleDetailsPage'
@@ -21,6 +20,7 @@ import { dateProblem, draftFromForm, type EntryFormState, withChanges } from './
 import { HoursField } from './HoursField'
 import { MoreDetailsRow } from './MoreDetailsRow'
 import { useShowPrefill } from './useShowPrefill'
+import { useToday } from './useToday'
 import './entryForm.css'
 
 type EntryFormProps = {
@@ -39,7 +39,7 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
   const [presentAlert] = useIonAlert()
   const toast = useMessageToast()
   const entries = useAllEntries()
-  const [today] = useState(todayIso)
+  const today = useToday()
   const change = (changes: Partial<EntryFormState>) => setForm((current) => withChanges(current, changes, today))
   const isStopped = form.status === 'stopped'
   const isShow = isShowType(form.type)

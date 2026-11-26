@@ -12,6 +12,14 @@ export const toIsoDate = (date: Date) => `${date.getFullYear()}-${pad(date.getMo
 
 export const todayIso = () => toIsoDate(new Date())
 
+const PAST_MIDNIGHT_MS = 1000
+
+export function msUntilTomorrow(now: Date) {
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+
+  return tomorrow.getTime() - now.getTime() + PAST_MIDNIGHT_MS
+}
+
 export const isYearOnly =(finishedOn: string) => YEAR_ONLY.test(finishedOn)
 
 function isRealDate(text: string) {

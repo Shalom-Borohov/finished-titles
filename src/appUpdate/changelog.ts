@@ -2,6 +2,11 @@ import type { Release } from './releases'
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.1.1',
+    features: [],
+    fixes: ['טופס שנשאר פתוח אחרי חצות מקבל עכשיו את התאריך של היום'],
+  },
+  {
     version: '1.1.0',
     features: [
       'מה חדש: אחרי עדכון נפתח חלון עם השינויים, ושורת הגרסה בהגדרות פותחת אותו',
