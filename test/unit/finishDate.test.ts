@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { finishYear, isFinishDate, isFutureFinishDate, toIsoDate } from '../../src/domain/finishDate'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { finishYear, isFinishDate, isFutureFinishDate, msUntilTomorrow, toIsoDate } from '../../src/domain/finishDate'
 
 describe('isFinishDate', () => {
   it.each(['2026', '2026-11-07', '1999-01-31'])('accepts %s', (text) => {
@@ -33,5 +33,23 @@ describe('isFutureFinishDate', () => {
 describe('toIsoDate', () => {
   it('uses the local calendar date', () => {
     expect(toIsoDate(new Date(2026, 10, 7, 23, 30))).toBe('2026-11-07')
+  })
+})
+
+describe('msUntilTomorrow', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('waits until a second past the next local midnight', () => {
+    expect(msUntilTomorrow(new Date(2026, 10, 25, 23, 59, 30))).toBe(31_000)
+  })
+
+  it('lands a second past local midnight on a day the clocks change', () => {
+    vi.stubEnv('TZ', 'Asia/Jerusalem')
+    const now = new Date(2026, 9, 25, 0, 0, 0)
+    const wake = new Date(now.getTime() + msUntilTomorrow(now))
+
+    expect([wake.getDate(), wake.getHours(), wake.getMinutes(), wake.getSeconds()]).toEqual([26, 0, 0, 1])
   })
 })
