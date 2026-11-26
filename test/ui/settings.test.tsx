@@ -63,7 +63,7 @@ describe('settings', () => {
     const files = share.mock.calls[0][0].files
 
     expect(files?.map((file) => file.name)).toEqual(['finished-titles-backup-2026-11-07.json'])
-    expect(await readJson(files?.[0])).toEqual({ version: 1, exportedAt: NOW, entries: [dune] })
+    expect(await readJson(files?.[0])).toEqual({ version: 2, exportedAt: NOW, entries: [dune] })
   })
 
   it('restores a backup only after confirming', async () => {
@@ -91,6 +91,18 @@ describe('settings', () => {
     chooseFile('{"version":1}')
 
     await waitFor(() => expect(toasts()).toContain('קובץ הגיבוי לא תקין'))
+    expect(await db.entries.toArray()).toEqual([dune])
+  })
+
+  it('says a backup from a newer version needs an update, and keeps the list', async () => {
+    await db.entries.add(dune)
+    renderAt('/tabs/settings')
+    await screen.findByRole('button', { name: 'ייבוא גיבוי' })
+
+    chooseFile(JSON.stringify({ version: 3, exportedAt: NOW, entries: [] }))
+
+    await waitFor(() => expect(toasts()).toContain('הגיבוי מגרסה חדשה יותר של האפליקציה. צריך לעדכן אותה ולנסות שוב.'))
+    expect(toasts()).not.toContain('קובץ הגיבוי לא תקין')
     expect(await db.entries.toArray()).toEqual([dune])
   })
 

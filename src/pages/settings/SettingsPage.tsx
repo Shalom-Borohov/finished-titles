@@ -3,7 +3,7 @@ import { type ChangeEvent, useRef } from 'react'
 import { ImportIcon, ShareIcon } from '../../components/icons'
 import { useMessageToast } from '../../components/useMessageToast'
 import { COMMON_COPY } from '../../copy/common'
-import { type Backup, exportBackup, parseBackup, restoreBackup } from '../../data/backup'
+import { type Backup, exportBackup, NewerBackupError, parseBackup, restoreBackup } from '../../data/backup'
 import { BACKUP_FILE_ACCEPT, shareBackup } from './backupFile'
 import { SETTINGS_COPY } from './copy'
 import { FeedbackSettings } from './FeedbackSettings'
@@ -57,8 +57,8 @@ export function SettingsPage() {
 
     try {
       confirmRestore(parseBackup(await file.text()))
-    } catch {
-      void toast(SETTINGS_COPY.invalidBackup)
+    } catch (error) {
+      void toast(error instanceof NewerBackupError ? SETTINGS_COPY.newerBackup : SETTINGS_COPY.invalidBackup)
     }
   }
 
