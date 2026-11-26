@@ -12,6 +12,7 @@ export const SETTINGS_COPY = {
   confirmImport: 'החלפת הרשימה',
   backupRestored: 'הגיבוי שוחזר',
   invalidBackup: 'קובץ הגיבוי לא תקין',
+  newerBackup: 'הגיבוי מגרסה חדשה יותר של האפליקציה. צריך לעדכן אותה ולנסות שוב.',
   genres: 'ז׳אנרים',
   fillGenres: 'השלמת ז׳אנרים מ-TMDB',
   genresWaiting: (count: number) =>
