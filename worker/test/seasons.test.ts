@@ -1,22 +1,17 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import type { Env } from '../src/types'
 import {
   ALLOWED_ORIGIN_HEADERS,
   APP_ORIGIN,
   BASE_ENV,
   callWorker,
+  freezeToday,
   requestTo,
   stubUpstreams,
   TMDB_ENV,
   TMDB_HOST,
+  TODAY,
 } from './helpers/worker'
-
-const TODAY = '2026-11-12'
-
-function freezeToday() {
-  vi.useFakeTimers({ toFake: ['Date'] })
-  vi.setSystemTime(`${TODAY}T12:00:00Z`)
-}
 
 function stubTmdb(reply: () => Response) {
   return stubUpstreams({ [TMDB_HOST]: reply })

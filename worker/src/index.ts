@@ -1,9 +1,12 @@
 import {
+  check,
   maxLength,
   maxValue,
   minLength,
   minValue,
+  nullable,
   nullish,
+  object,
   pipe,
   regex,
   safeParse,
@@ -14,23 +17,28 @@ import {
 import { corsHeaders, forbiddenResponse, isAllowedOrigin, preflightResponse } from './cors'
 import { searchIgdb } from './igdb'
 import { searchOpenLibrary } from './openLibrary'
-import { searchTmdb, tmdbSeasonFacts } from './tmdb'
+import { searchTmdb, TV_REFERENCE_PREFIX, tmdbSeasonFacts } from './tmdb'
 import { tmdbTitleDetails } from './tmdbDetails'
+import { tmdbTitleMinutes } from './tmdbLength'
 import type { Env, SearchResponse } from './types'
 
 const SEARCH_PATH = '/search'
 const SEASONS_PATH = '/seasons'
 const DETAILS_PATH = '/details'
+const LENGTH_PATH = '/length'
 const READ_METHOD = 'GET'
 const PREFLIGHT_METHOD = 'OPTIONS'
 const QUERY_PARAMETER = 'q'
 const PAGE_PARAMETER = 'page'
 const TV_PARAMETER = 'tv'
 const TITLE_PARAMETER = 'title'
+const SEASON_PARAMETER = 'season'
 const MIN_QUERY_LENGTH = 2
 const MAX_QUERY_LENGTH = 100
 const FIRST_PAGE = 1
 const MAX_PAGE = 500
+const FIRST_SEASON = 1
+const MAX_SEASON = 1000
 const DIGITS_ONLY = /^\d+$/
 const TMDB_TITLE_REFERENCE = /^(tv|movie)\/\d+$/
 const SOURCE_DEADLINE_MS = 8000
@@ -53,6 +61,19 @@ const pageSchema = nullish(
 
 const tvIdSchema = pipe(string(), regex(DIGITS_ONLY))
 const titleSchema = pipe(string(), regex(TMDB_TITLE_REFERENCE))
+
+const seasonNumberSchema = pipe(
+  string(),
+  regex(DIGITS_ONLY),
+  transform(Number),
+  minValue(FIRST_SEASON),
+  maxValue(MAX_SEASON),
+)
+
+const lengthSchema = pipe(
+  object({ title: titleSchema, season: nullable(seasonNumberSchema) }),
+  check(({ title, season }) => title.startsWith(TV_REFERENCE_PREFIX) === (season !== null)),
+)
 
 function rejectAtDeadline(): Promise<never> {
   return new Promise((_resolve, reject) => {
@@ -127,6 +148,25 @@ export default {
 
       try {
         return Response.json(await tmdbTitleDetails(title.output, env), { headers })
+      } catch {
+        return new Response(null, { status: BAD_GATEWAY_STATUS, headers })
+      }
+    }
+
+    if (url.pathname === LENGTH_PATH) {
+      const length = safeParse(lengthSchema, {
+        title: url.searchParams.get(TITLE_PARAMETER),
+        season: url.searchParams.get(SEASON_PARAMETER),
+      })
+
+      if (!length.success) {
+        return new Response(null, { status: BAD_REQUEST_STATUS, headers })
+      }
+
+      const { title, season } = length.output
+
+      try {
+        return Response.json(await tmdbTitleMinutes(title, season, env), { headers })
       } catch {
         return new Response(null, { status: BAD_GATEWAY_STATUS, headers })
       }

@@ -38,7 +38,7 @@ describe('importing a backup from the recovery screen', () => {
 
   it('says a backup from a newer version needs an update, and keeps the list', async () => {
     await openRecoveryScreen()
-    chooseBackupFile(JSON.stringify({ version: 3, exportedAt: BACKUP_EXPORTED_AT, entries: [] }))
+    chooseBackupFile(JSON.stringify({ version: 4, exportedAt: BACKUP_EXPORTED_AT, entries: [] }))
 
     const newerLine = await screen.findByText('הגיבוי מגרסה חדשה יותר של האפליקציה. צריך לעדכן אותה ולנסות שוב.')
 

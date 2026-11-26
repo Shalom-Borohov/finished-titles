@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { ALL_TYPES, type TypeFilter } from '../../domain/entries'
 import { todayIso } from '../../domain/finishDate'
 import { type Entry, isSearchableType, type MediaType } from '../../domain/types'
-import { type SearchResult, tmdbTvId } from '../../search/client'
+import { type SearchResult, tmdbTitleId } from '../../search/client'
 import { genresFromTmdb } from '../../search/tmdbGenres'
 import { EntryForm } from './EntryForm'
 import { type EntryFormState, formFromDraft, formFromEntry } from './formState'
@@ -12,7 +12,7 @@ import './entry.css'
 
 const DEFAULT_MANUAL_TYPE: MediaType = 'movie'
 
-type SheetStep = { kind: 'search' } | { kind: 'form'; initial: EntryFormState; editing?: Entry; seasonsTvId?: string }
+type SheetStep = { kind: 'search' } | { kind: 'form'; initial: EntryFormState; editing?: Entry; pickedTitleId?: string }
 
 function formFromResult({ title, type, year, posterUrl, source, sourceId, genreIds }: SearchResult) {
   const genres = genreIds && genresFromTmdb(genreIds)
@@ -37,7 +37,7 @@ export function useEntrySheet(listType: TypeFilter) {
   const openEdit = (entry: Entry) => show({ kind: 'form', initial: formFromEntry(entry, todayIso()), editing: entry })
 
   const pickResult = (result: SearchResult) =>
-    show({ kind: 'form', initial: formFromResult(result), seasonsTvId: tmdbTvId(result) })
+    show({ kind: 'form', initial: formFromResult(result), pickedTitleId: tmdbTitleId(result) })
 
   function openAdd() {
     if (isSearchableType(defaultType)) {
@@ -65,7 +65,7 @@ export function useEntrySheet(listType: TypeFilter) {
           key={step.editing?.id}
           initial={step.initial}
           editing={step.editing}
-          seasonsTvId={step.seasonsTvId}
+          pickedTitleId={step.pickedTitleId}
           onOpenExisting={openEdit}
           onClose={close}
         />

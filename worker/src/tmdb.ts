@@ -1,10 +1,11 @@
-import { array, type InferOutput, nullish, number, object, string } from 'valibot'
+import { array, type GenericSchema, type InferOutput, nullish, number, object, string } from 'valibot'
 import type { Env, SearchResult, SourcePage } from './types'
 import { isUsableTitle, parseUpstreamJson } from './upstream'
 
 export const TMDB_URL = 'https://api.themoviedb.org/3'
 const SEARCH_URL = `${TMDB_URL}/search/multi`
 const TV_URL = `${TMDB_URL}/tv`
+export const TV_REFERENCE_PREFIX = 'tv/'
 const POSTER_URL = 'https://image.tmdb.org/t/p/w342'
 const MOVIE_MEDIA_TYPE = 'movie'
 const TV_MEDIA_TYPE = 'tv'
@@ -65,6 +66,10 @@ export function isFullDate(date: string | null | undefined): date is string {
   return typeof date === 'string' && FULL_DATE.test(date)
 }
 
+export function todayUtc() {
+  return new Date().toISOString().slice(0, ISO_DATE_LENGTH)
+}
+
 function hasAiredRegularSeason(season: TmdbSeason, today: string) {
   return season.season_number >= FIRST_REGULAR_SEASON && isFullDate(season.air_date) && season.air_date <= today
 }
@@ -103,6 +108,10 @@ export function authorizedHeaders(env: Env) {
   return { Authorization: `Bearer ${env.TMDB_TOKEN}` }
 }
 
+export async function tmdbJson<Output>(path: string, headers: HeadersInit, schema: GenericSchema<unknown, Output>) {
+  return parseUpstreamJson(await fetch(`${TMDB_URL}/${path}`, { headers }), schema)
+}
+
 export async function searchTmdb(query: string, page: number, env: Env): Promise<SourcePage> {
   const headers = authorizedHeaders(env)
   const url = new URL(SEARCH_URL)
@@ -119,7 +128,7 @@ export async function tmdbSeasonFacts(tvId: string, env: Env): Promise<SeasonFac
   const headers = authorizedHeaders(env)
   const response = await fetch(`${TV_URL}/${tvId}`, { headers })
   const { seasons, status, last_air_date } = await parseUpstreamJson(response, tvDetailsSchema)
-  const today = new Date().toISOString().slice(0, ISO_DATE_LENGTH)
+  const today = todayUtc()
   const airedSeasons = seasons.filter((season) => hasAiredRegularSeason(season, today)).length
   const endYear = isFinishedStatus(status) ? yearOf(last_air_date) : undefined
 

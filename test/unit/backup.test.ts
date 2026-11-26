@@ -12,8 +12,8 @@ const backupText = (entries: object[]) => JSON.stringify({ version: 1, exportedA
 
 const sorted = (items: readonly string[]) => items.toSorted()
 
-const VERSION_2_FORMAT = {
-  version: 2,
+const VERSION_3_FORMAT = {
+  version: 3,
   backupFields: ['entries', 'exportedAt', 'version'],
   entryFields: sorted([
     'id',
@@ -34,6 +34,7 @@ const VERSION_2_FORMAT = {
     'stopReason',
     'genres',
     'hours',
+    'lengthMinutes',
   ]),
   types: sorted(['anime', 'series', 'movie', 'book', 'game', 'comic', 'other']),
   statuses: sorted(['finished', 'stopped', 'ongoing']),
@@ -67,7 +68,7 @@ const VERSION_2_FORMAT = {
 describe('backup', () => {
   beforeEach(resetDb)
 
-  it('is version 2, and any field or allowed value added to the format needs a new version', async () => {
+  it('is version 3, and any field or allowed value added to the format needs a new version', async () => {
     const backup = await exportBackup(NOW)
 
     expect({
@@ -79,7 +80,7 @@ describe('backup', () => {
       ratings: sorted(RATINGS),
       genres: sorted(GENRES),
       sources: sorted(SEARCH_SOURCES),
-    }).toEqual(VERSION_2_FORMAT)
+    }).toEqual(VERSION_3_FORMAT)
   })
 
   it('survives a round trip through a file', async () => {
@@ -109,6 +110,34 @@ describe('backup', () => {
 
     expect(restored).toEqual(before)
     expect(restored.map(({ genres }) => genres)).toEqual(expect.arrayContaining([['scifi', 'drama'], []]))
+  })
+
+  it('keeps the TMDB lengths through a round trip, including an empty list', async () => {
+    await addEntry({ title: 'Dune', type: 'movie', status: 'finished', lengthMinutes: [155] }, NOW)
+    await addEntry({ title: 'Severance', type: 'series', status: 'stopped', lengthMinutes: [480, 0] }, NOW)
+    await addEntry({ title: 'Unknown', type: 'movie', status: 'finished', lengthMinutes: [] }, NOW)
+
+    const before = await allEntries()
+    const text = JSON.stringify(await exportBackup(NOW))
+
+    await resetDb()
+    await restoreBackup(parseBackup(text))
+
+    const restored = await allEntries()
+
+    expect(restored).toEqual(before)
+    expect(restored.map(({ lengthMinutes }) => lengthMinutes)).toEqual(expect.arrayContaining([[155], [480, 0], []]))
+  })
+
+  it('still imports a version 2 backup, leaving the lengths unset', async () => {
+    const versionTwoMovie = { id: 'a', title: 'Dune', type: 'movie', status: 'finished', createdAt: NOW, genres: ['scifi'] }
+
+    await restoreBackup(parseBackup(JSON.stringify({ version: 2, exportedAt: NOW, entries: [versionTwoMovie] })))
+
+    const [restored] = await allEntries()
+
+    expect(restored).toMatchObject({ title: 'Dune', genres: ['scifi'] })
+    expect(restored.lengthMinutes).toBeUndefined()
   })
 
   it('keeps a game still being played and its hours through a round trip', async () => {
@@ -175,6 +204,8 @@ describe('backup', () => {
     ['an unknown genre', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, genres: ['Drama'] }])],
     ['zero hours', backupText([{ id: 'a', title: 'x', type: 'game', status: 'finished', createdAt: NOW, hours: 0 }])],
     ['part of an hour', backupText([{ id: 'a', title: 'x', type: 'game', status: 'finished', createdAt: NOW, hours: 1.5 }])],
+    ['negative minutes', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, lengthMinutes: [-1] }])],
+    ['part of a minute', backupText([{ id: 'a', title: 'x', type: 'movie', status: 'finished', createdAt: NOW, lengthMinutes: [90.5] }])],
     ['a fractional version', JSON.stringify({ version: 1.5, exportedAt: NOW, entries: [] })],
     ['version 0', JSON.stringify({ version: 0, exportedAt: NOW, entries: [] })],
     ['a version written as text', JSON.stringify({ version: '2', exportedAt: NOW, entries: [] })],
@@ -184,14 +215,14 @@ describe('backup', () => {
   })
 
   it.each([
-    ['a whole newer backup', JSON.stringify({ version: 3, exportedAt: NOW, entries: [] })],
-    ['a newer backup in a shape this version cannot read', '{"version":3}'],
+    ['a whole newer backup', JSON.stringify({ version: 4, exportedAt: NOW, entries: [] })],
+    ['a newer backup in a shape this version cannot read', '{"version":4}'],
   ])('refuses %s as newer, not as invalid', (_name, text) => {
     expect(() => parseBackup(text)).toThrow(NewerBackupError)
   })
 
   it('calls a fractional version above its own invalid, not newer', () => {
-    const fractionalVersion = JSON.stringify({ version: 3.5, exportedAt: NOW, entries: [] })
+    const fractionalVersion = JSON.stringify({ version: 4.5, exportedAt: NOW, entries: [] })
 
     expect(() => parseBackup(fractionalVersion)).toThrow()
     expect(() => parseBackup(fractionalVersion)).not.toThrow(NewerBackupError)

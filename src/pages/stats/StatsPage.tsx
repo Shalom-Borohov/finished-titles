@@ -41,10 +41,10 @@ function TypeCounts({ stats }: { stats: LibraryStats }) {
     <section className="card">
       <h2>{STATS_COPY.byType}</h2>
       <dl className="type-counts">
-        {stats.byType.map(({ type, count }) => (
+        {stats.byType.map(({ type, count, hours }) => (
           <div key={type}>
             <dt>{MEDIA_TYPE_LABELS[type]}</dt>
-            <dd>{count}</dd>
+            <dd>{STATS_COPY.typeCount(count, hours)}</dd>
           </div>
         ))}
       </dl>
@@ -84,7 +84,7 @@ export function StatsPage() {
           <header className="stats-header">
             <h1 className="page-title">{COMMON_COPY.stats}</h1>
             {stats && <p>{STATS_COPY.summary(stats)}</p>}
-            {stats && stats.gameHours > 0 && <p>{STATS_COPY.gameHours(stats.gameHours)}</p>}
+            {stats && stats.hours > 0 && <p>{STATS_COPY.hours(stats.hours)}</p>}
           </header>
           {stats && (
             <>

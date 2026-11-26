@@ -22,6 +22,8 @@ const MINIMUM_SEASON = 1
 
 export const MINIMUM_HOURS = 1
 
+export const MINIMUM_MINUTES = 0
+
 export const MEDIA_TYPES = ['anime', 'series', 'movie', 'book', 'game', 'comic', 'other'] as const
 
 export type MediaType = (typeof MEDIA_TYPES)[number]
@@ -74,6 +76,8 @@ const seasonSchema = pipe(number(), integer(), minValue(MINIMUM_SEASON))
 
 const hoursSchema = pipe(number(), integer(), minValue(MINIMUM_HOURS))
 
+const minutesSchema = pipe(number(), integer(), minValue(MINIMUM_MINUTES))
+
 export const posterUrlSchema = pipe(string(), url())
 
 export const entrySchema = object({
@@ -95,6 +99,7 @@ export const entrySchema = object({
   stopReason: optional(string()),
   genres: optional(array(picklist(GENRES))),
   hours: optional(hoursSchema),
+  lengthMinutes: optional(array(minutesSchema)),
 })
 
 export type Entry = InferOutput<typeof entrySchema>

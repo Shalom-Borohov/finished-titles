@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  awaitingGenres,
+  awaitingTmdbFill,
   filterEntries,
   findExisting,
   homeTiles,
@@ -172,17 +172,19 @@ describe('offeredRatings and offeredGenres', () => {
   })
 })
 
-describe('awaitingGenres', () => {
-  it('lists TMDB titles whose genres were never set', () => {
+describe('awaitingTmdbFill', () => {
+  it('lists TMDB titles whose genres or lengths were never set', () => {
     const entries = [
-      entry({ title: 'Waiting', source: 'tmdb', sourceId: 'movie/1' }),
-      entry({ title: 'Cleared', source: 'tmdb', sourceId: 'movie/2', genres: [] }),
-      entry({ title: 'Tagged', source: 'tmdb', sourceId: 'movie/3', genres: ['drama'] }),
+      entry({ title: 'Waiting for both', source: 'tmdb', sourceId: 'movie/1' }),
+      entry({ title: 'Waiting for genres', source: 'tmdb', sourceId: 'movie/2', lengthMinutes: [120] }),
+      entry({ title: 'Waiting for a length', source: 'tmdb', sourceId: 'movie/3', genres: ['drama'] }),
+      entry({ title: 'Cleared', source: 'tmdb', sourceId: 'movie/4', genres: [], lengthMinutes: [] }),
+      entry({ title: 'Filled', source: 'tmdb', sourceId: 'tv/5', genres: ['drama'], lengthMinutes: [480, 0] }),
       entry({ title: 'Manual' }),
       entry({ title: 'Book', type: 'book', source: 'openlibrary', sourceId: '/works/OL1W' }),
     ]
 
-    expect(titles(awaitingGenres(entries))).toEqual(['Waiting'])
+    expect(titles(awaitingTmdbFill(entries))).toEqual(['Waiting for both', 'Waiting for genres', 'Waiting for a length'])
   })
 })
 

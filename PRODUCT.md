@@ -35,7 +35,7 @@ Logging is rare, roughly once per finished title, so the app is not a daily habi
 - One entry per show, with an optional seasons-watched number. Stopped entries record why, and shows also record the season.
 - Rating words, optional: אהוב במיוחד, אהבתי מאוד, אהבתי, היה בסדר, לא אהבתי.
 - Optional note. Finish date is an exact date, a year, or blank.
-- A stats screen: totals by type, titles per year, rating breakdown, finished versus stopped, and total game hours.
+- A stats screen: totals by type, titles per year, rating breakdown, finished versus stopped, and hours in total and per type.
 - Data lives on the device, with a JSON backup file. The list works offline; search needs a connection.
 - Hebrew UI, full RTL. Titles stay in English or romanized form, so every screen mixes RTL and LTR text.
 

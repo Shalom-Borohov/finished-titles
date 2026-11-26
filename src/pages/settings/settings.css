@@ -30,7 +30,7 @@
   line-height: 1.4;
 }
 
-.genre-fill-progress {
+.tmdb-fill-progress {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,14 +39,14 @@
   font-size: 0.9375rem;
 }
 
-.genre-fill-track {
+.tmdb-fill-track {
   height: 10px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--app-ground);
 }
 
-.genre-fill-bar {
+.tmdb-fill-bar {
   height: 100%;
   border-radius: 999px;
   background: var(--app-accent);
@@ -54,7 +54,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .genre-fill-bar {
+  .tmdb-fill-bar {
     transition: none;
   }
 }

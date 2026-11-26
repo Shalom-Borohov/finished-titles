@@ -20,18 +20,18 @@ import { GenreField } from './GenreField'
 import { dateProblem, draftFromForm, type EntryFormState, withChanges } from './formState'
 import { HoursField } from './HoursField'
 import { MoreDetailsRow } from './MoreDetailsRow'
-import { useShowPrefill } from './useShowPrefill'
+import { usePickPrefill } from './usePickPrefill'
 import './entryForm.css'
 
 type EntryFormProps = {
   initial: EntryFormState
   editing?: Entry
-  seasonsTvId?: string
+  pickedTitleId?: string
   onOpenExisting: (entry: Entry) => void
   onClose: () => void
 }
 
-export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClose }: EntryFormProps) {
+export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onClose }: EntryFormProps) {
   const [form, setForm] = useState(initial)
   const [isSaving, setIsSaving] = useState(false)
   const [showingDetails, setShowingDetails] = useState(false)
@@ -50,13 +50,15 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
   const detailsTitleId = tmdbTitleId(form)
   const sheetTitle = editing ? ENTRY_COPY.editTitle : COMMON_COPY.addTitle
 
-  useShowPrefill(seasonsTvId, ({ seasons, endYear }) =>
-    setForm((current) => ({
-      ...current,
-      seasons: current.seasons === undefined && seasons > 0 ? seasons : current.seasons,
-      endYear: endYear ?? current.endYear,
-    })),
-  )
+  usePickPrefill(pickedTitleId, {
+    onShow: ({ seasons, endYear }) =>
+      setForm((current) => ({
+        ...current,
+        seasons: current.seasons === undefined && seasons > 0 ? seasons : current.seasons,
+        endYear: endYear ?? current.endYear,
+      })),
+    onLength: (lengthMinutes) => setForm((current) => ({ ...current, lengthMinutes })),
+  })
 
   async function save() {
     const draft = draftFromForm(form)

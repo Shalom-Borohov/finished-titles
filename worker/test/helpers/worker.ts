@@ -13,6 +13,12 @@ export const OPEN_LIBRARY_HOST = 'openlibrary.org'
 export const TWITCH_HOST = 'id.twitch.tv'
 export const IGDB_HOST = 'api.igdb.com'
 export const WORKER_URL = 'https://finished-titles-search.example'
+export const TODAY = '2026-11-12'
+
+export function freezeToday() {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(`${TODAY}T12:00:00Z`)
+}
 
 export const emptyOpenLibraryReply = () => Response.json({ docs: [], numFound: 0 })
 
