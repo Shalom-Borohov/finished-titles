@@ -75,4 +75,11 @@ describe('sheet names', () => {
 
     await expectSheetName(await screen.findByText('פתיחה ב-GitHub'), 'דיווח')
   })
+
+  it('names the what’s new sheet by its title', async () => {
+    renderAt('/tabs/settings')
+    fireEvent.click(await screen.findByRole('button', { name: new RegExp(`^גרסה ${__APP_VERSION__.replaceAll('.', '\\.')}`) }))
+
+    await expectSheetName(await screen.findByText(`גרסה ${__APP_VERSION__}`), 'מה חדש')
+  })
 })
