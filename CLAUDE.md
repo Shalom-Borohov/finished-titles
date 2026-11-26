@@ -26,7 +26,7 @@ The app reads the Worker's address from `VITE_SEARCH_URL`, kept in `.env.product
 Imports go downward only: `pages` → `data` / `domain` / `search` → `copy`. The one exception is that `copy` may import types from `domain`, which has no runtime effect.
 
 - `src/domain/`: pure functions over `Entry[]`, with no React or Dexie.
-- `src/data/`: the Dexie database, the repo and backup. Writes go through `repo.ts`, which runs `normalizeEntry`. New `Entry` fields must be optional so old backups still import.
+- `src/data/`: the Dexie database, the repo and backup. Writes go through `repo.ts`, which runs `normalizeEntry`. New `Entry` fields must be optional so old backups still import, and a new field or allowed value raises `BACKUP_VERSION` (spec 93).
 - `src/search/client.ts`: calls the Worker and validates its response.
 - `src/pages/<feature>/`: one folder per screen, each with its own `copy.ts` and CSS. `pages/entry/useEntrySheet.tsx` owns the add and edit sheet.
 
