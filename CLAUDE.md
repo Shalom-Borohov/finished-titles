@@ -15,6 +15,10 @@
 
 The app reads the Worker's address from `VITE_SEARCH_URL`, kept in `.env.production` (builds) and `.env.development` (`npm run dev`). Commit both files: GitHub Pages builds from the repo, so an uncommitted address never reaches the phone. Without it, search reports itself as unavailable and manual entry still works.
 
+## Releases
+
+Every PR that ships raises `version` in `package.json` (and the two root fields in `package-lock.json`): minor for features, patch for fixes. The same PR adds its release to `src/appUpdate/changelog.ts`, with short Hebrew lines for what the owner will notice under `features` and `fixes`. PRs that change only CI or docs keep the version and add no release (spec 103). A parallel branch that merges second fixes both by hand.
+
 ## Sources of truth
 
 - `docs/specs/2026-11-07-finished-titles-design.md`: numbered decisions. Add new behaviour there as a new numbered decision.
