@@ -2,6 +2,8 @@ import { IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@io
 import { Navigate, Route } from 'react-router-dom'
 import { UPDATE_BAR_SHOWN_CLASS, UpdateBar } from './appUpdate/UpdateBar'
 import { useUpdateBar } from './appUpdate/useUpdateBar'
+import { useWhatsNew } from './appUpdate/useWhatsNew'
+import { WhatsNewSheet } from './appUpdate/WhatsNewSheet'
 import { GridIcon, SlidersIcon, StatsIcon } from './components/icons'
 import { COMMON_COPY } from './copy/common'
 import { HOME_PATH, SETTINGS_PATH, STATS_PATH } from './navigation/paths'
@@ -12,6 +14,7 @@ import { StatsPage } from './pages/stats/StatsPage'
 
 export function Tabs() {
   const updateBar = useUpdateBar()
+  const whatsNew = useWhatsNew()
 
   return (
     <IonTabs className={updateBar.shown ? UPDATE_BAR_SHOWN_CLASS : undefined}>
@@ -23,6 +26,7 @@ export function Tabs() {
         <Route index element={<Navigate to="home" replace />} />
       </IonRouterOutlet>
       <UpdateBar {...updateBar} />
+      <WhatsNewSheet {...whatsNew} />
       <IonTabBar slot="bottom" className="floating-tab-bar">
         <IonTabButton tab="home" href={HOME_PATH}>
           <GridIcon />

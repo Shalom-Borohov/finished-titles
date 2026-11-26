@@ -8,6 +8,7 @@ import { type Backup, restoreBackup } from '../../data/backup'
 import { SETTINGS_COPY } from './copy'
 import { FeedbackSettings } from './FeedbackSettings'
 import { GenreFillSettings } from './GenreFillSettings'
+import { VersionSettings } from './VersionSettings'
 import './settings.css'
 
 const TMDB_LOGO_PATH = `${import.meta.env.BASE_URL}tmdb-logo.svg`
@@ -88,7 +89,7 @@ export function SettingsPage() {
             </p>
           </section>
 
-          <p className="settings-version">{SETTINGS_COPY.version(__APP_VERSION__, __APP_BUILT_AT__)}</p>
+          <VersionSettings />
 
           <input
             ref={fileInput}

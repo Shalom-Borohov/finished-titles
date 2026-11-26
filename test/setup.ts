@@ -2,7 +2,8 @@ import 'fake-indexeddb/auto'
 import '@testing-library/jest-dom/vitest'
 import { setupIonicReact } from '@ionic/react'
 import { cleanup, configure } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach } from 'vitest'
+import { saveSeenVersion } from '../src/appUpdate/seenVersion'
 
 configure({ defaultHidden: true })
 
@@ -49,6 +50,10 @@ function removeIonicStylesThatSlowRoleQueries() {
 
 removeIonicStylesThatSlowRoleQueries()
 setupIonicReact({ mode: 'ios' })
+
+beforeEach(() => {
+  saveSeenVersion(__APP_VERSION__)
+})
 
 afterEach(() => {
   cleanup()

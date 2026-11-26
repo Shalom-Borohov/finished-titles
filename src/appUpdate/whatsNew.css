@@ -1,0 +1,20 @@
+.release-changes + .release-changes {
+  margin-top: 12px;
+}
+
+.release-changes h3 {
+  margin: 0;
+  color: var(--app-ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.release-changes ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding-inline-start: 20px;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
