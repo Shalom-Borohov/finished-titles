@@ -48,7 +48,7 @@ function finishedOnOf({ dateKind, exactDate, yearText }: DateFields) {
   return dateKind === 'year' ? yearText : exactDate
 }
 
-export function dateProblem(form: EntryFormState, today: string) {
+export function dateProblem(form: EntryFormState, today: string, savedOn?: string) {
   const finishedOn = finishedOnOf(form)
 
   if (finishedOn === undefined) {
@@ -59,7 +59,9 @@ export function dateProblem(form: EntryFormState, today: string) {
     return form.dateKind === 'year' ? ENTRY_COPY.invalidYear : ENTRY_COPY.invalidDate
   }
 
-  return isFutureFinishDate(finishedOn, today) ? ENTRY_COPY.futureDate : undefined
+  const isChangedToFuture = finishedOn !== savedOn && isFutureFinishDate(finishedOn, today)
+
+  return isChangedToFuture ? ENTRY_COPY.futureDate : undefined
 }
 
 const isOngoing = ({ status }: EntryFormState) => status === 'ongoing'

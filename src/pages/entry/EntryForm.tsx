@@ -44,7 +44,7 @@ export function EntryForm({ initial, editing, seasonsTvId, onOpenExisting, onClo
   const isStopped = form.status === 'stopped'
   const isShow = isShowType(form.type)
   const isGame = isGameType(form.type)
-  const problem = dateProblem(form, today)
+  const problem = dateProblem(form, today, editing?.finishedOn)
   const hasTitle = form.title.trim() !== ''
   const duplicate = !editing && !isSaving && hasTitle ? findExisting(entries ?? [], form) : undefined
   const detailsTitleId = tmdbTitleId(form)

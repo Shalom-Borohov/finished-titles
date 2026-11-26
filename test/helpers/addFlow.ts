@@ -35,3 +35,5 @@ export async function savedEntries() {
 }
 
 export const save = async () => fireEvent.click(await screen.findByText('שמירה'))
+
+export const saveButton = async () => (await screen.findByText('שמירה')).closest('ion-button')

@@ -6,6 +6,7 @@ import {
   pickResult,
   pressButton,
   save,
+  saveButton,
   savedEntries,
   searchFor,
   searchStatus,
@@ -30,8 +31,6 @@ const DUNE = {
 const SEVERANCE = { source: 'tmdb', sourceId: '95396', title: 'Severance', type: 'series', year: 2022 } as const
 
 const BOTH_DUNES = [{ ...DUNE, sourceId: 'movie/841', year: 1984 }, DUNE]
-
-const saveButton = async () => (await screen.findByText('שמירה')).closest('ion-button')
 
 describe('adding a title', () => {
   beforeEach(resetDb)
