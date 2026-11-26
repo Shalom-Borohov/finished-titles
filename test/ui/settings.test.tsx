@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../src/data/db'
+import { chooseBackupFile, readSharedBackup, stubShare } from '../helpers/backupFile'
 import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
@@ -17,12 +18,6 @@ const versionLine = new RegExp(
 
 const toasts = () => Array.from(document.querySelectorAll('ion-toast'), (toast) => toast.message)
 
-function chooseFile(text: string) {
-  fireEvent.change(screen.getByLabelText('קובץ גיבוי'), {
-    target: { files: [new File([text], 'backup.json', { type: 'application/json' })] },
-  })
-}
-
 async function openFeedback() {
   fireEvent.click(await screen.findByRole('button', { name: 'דיווח על באג / הצעה' }))
   await screen.findByText('פתיחה ב-GitHub')
@@ -30,14 +25,6 @@ async function openFeedback() {
 
 function describeReport(text: string) {
   fireEvent.change(screen.getByLabelText('תיאור'), { target: { value: text } })
-}
-
-async function readJson(file: Blob | undefined) {
-  if (!file) {
-    throw new Error('no file')
-  }
-
-  return JSON.parse(await file.text())
 }
 
 describe('settings', () => {
@@ -51,9 +38,8 @@ describe('settings', () => {
   it('exports a backup through the share sheet', async () => {
     await db.entries.add(dune)
 
-    const share = vi.fn<(data: ShareData) => Promise<void>>().mockResolvedValue()
+    const share = stubShare()
 
-    Object.assign(navigator, { share, canShare: () => true })
     renderAt('/tabs/settings')
 
     fireEvent.click(await screen.findByRole('button', { name: 'ייצוא גיבוי' }))
@@ -63,7 +49,7 @@ describe('settings', () => {
     const files = share.mock.calls[0][0].files
 
     expect(files?.map((file) => file.name)).toEqual(['finished-titles-backup-2026-11-07.json'])
-    expect(await readJson(files?.[0])).toEqual({ version: 2, exportedAt: NOW, entries: [dune] })
+    expect(await readSharedBackup(share)).toEqual({ version: 2, exportedAt: NOW, entries: [dune] })
   })
 
   it('restores a backup only after confirming', async () => {
@@ -73,7 +59,7 @@ describe('settings', () => {
 
     const shown = alertShown()
 
-    chooseFile(JSON.stringify({ version: 1, exportedAt: NOW, entries: [dune] }))
+    chooseBackupFile(JSON.stringify({ version: 1, exportedAt: NOW, entries: [dune] }))
     await shown
 
     expect((await db.entries.toArray()).map(({ title }) => title)).toEqual(['Old'])
@@ -88,7 +74,7 @@ describe('settings', () => {
     renderAt('/tabs/settings')
     await screen.findByRole('button', { name: 'ייבוא גיבוי' })
 
-    chooseFile('{"version":1}')
+    chooseBackupFile('{"version":1}')
 
     await waitFor(() => expect(toasts()).toContain('קובץ הגיבוי לא תקין'))
     expect(await db.entries.toArray()).toEqual([dune])
@@ -99,7 +85,7 @@ describe('settings', () => {
     renderAt('/tabs/settings')
     await screen.findByRole('button', { name: 'ייבוא גיבוי' })
 
-    chooseFile(JSON.stringify({ version: 3, exportedAt: NOW, entries: [] }))
+    chooseBackupFile(JSON.stringify({ version: 3, exportedAt: NOW, entries: [] }))
 
     await waitFor(() => expect(toasts()).toContain('הגיבוי מגרסה חדשה יותר של האפליקציה. צריך לעדכן אותה ולנסות שוב.'))
     expect(toasts()).not.toContain('קובץ הגיבוי לא תקין')

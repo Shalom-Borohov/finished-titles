@@ -1,5 +1,6 @@
-import type { Backup } from '../../data/backup'
-import { toIsoDate } from '../../domain/finishDate'
+import { COMMON_COPY } from '../copy/common'
+import { type Backup, exportBackup, NewerBackupError, parseBackup } from '../data/backup'
+import { toIsoDate } from '../domain/finishDate'
 
 const BACKUP_FILE_PREFIX = 'finished-titles-backup-'
 
@@ -12,6 +13,17 @@ const SHARE_CANCELLED_ERROR = 'AbortError'
 const DOWNLOAD_URL_LIFETIME_MS = 60_000
 
 export const BACKUP_FILE_ACCEPT = [BACKUP_MIME_TYPE, BACKUP_EXTENSION].join(',')
+
+export const backupReadFailure = (error: unknown) =>
+  error instanceof NewerBackupError ? COMMON_COPY.newerBackup : COMMON_COPY.invalidBackup
+
+export async function readChosenBackup(input: HTMLInputElement) {
+  const file = input.files?.[0]
+
+  input.value = ''
+
+  return file ? parseBackup(await file.text()) : null
+}
 
 async function shareFile(file: File) {
   try {
@@ -41,3 +53,5 @@ export async function shareBackup(backup: Backup) {
   link.click()
   setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_LIFETIME_MS)
 }
+
+export const shareStoredBackup = async () => shareBackup(await exportBackup(Date.now()))

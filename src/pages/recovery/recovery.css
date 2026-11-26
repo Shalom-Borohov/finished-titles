@@ -1,0 +1,45 @@
+.recovery {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top) + 48px) 16px calc(env(safe-area-inset-bottom) + 24px);
+  background: var(--app-ground);
+  color: var(--app-ink);
+  font-family: var(--ion-font-family);
+}
+
+.recovery .page-title {
+  margin-bottom: 8px;
+}
+
+.recovery p {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.recovery button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 12px;
+  padding: 0 18px;
+  border-radius: var(--app-radius-pill);
+  background: var(--app-surface);
+  color: var(--app-accent);
+  font-size: 1rem;
+}
+
+.recovery .recovery-primary {
+  background: var(--app-accent);
+  color: var(--ion-color-primary-contrast);
+  font-weight: 600;
+}
+
+.recovery .recovery-destructive {
+  color: var(--app-danger);
+}
+
+.recovery button:disabled {
+  opacity: 0.5;
+}

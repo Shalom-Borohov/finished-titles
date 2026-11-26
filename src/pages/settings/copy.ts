@@ -4,15 +4,8 @@ const BUILD_TIME_FORMAT = new Intl.DateTimeFormat('he-IL', { dateStyle: 'short',
 
 export const SETTINGS_COPY = {
   backup: 'גיבוי',
-  exportBackup: 'ייצוא גיבוי',
-  importBackup: 'ייבוא גיבוי',
-  backupFile: 'קובץ גיבוי',
   storageNote: 'הרשימה שמורה רק בטלפון הזה. כדאי לייצא גיבוי מדי פעם.',
-  importWarning: 'הגיבוי יחליף את כל הרשימה הנוכחית. אי אפשר לבטל את זה.',
-  confirmImport: 'החלפת הרשימה',
   backupRestored: 'הגיבוי שוחזר',
-  invalidBackup: 'קובץ הגיבוי לא תקין',
-  newerBackup: 'הגיבוי מגרסה חדשה יותר של האפליקציה. צריך לעדכן אותה ולנסות שוב.',
   genres: 'ז׳אנרים',
   fillGenres: 'השלמת ז׳אנרים מ-TMDB',
   genresWaiting: (count: number) =>
