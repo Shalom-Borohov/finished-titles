@@ -1,7 +1,16 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../src/data/db'
-import { openAdd, pickResult, pressButton, save, savedEntries, searchFor } from '../helpers/addFlow'
+import {
+  openAdd,
+  pickResult,
+  pressButton,
+  save,
+  savedEntries,
+  searchFor,
+  searchStatus,
+  typeQuery,
+} from '../helpers/addFlow'
 import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
@@ -19,6 +28,8 @@ const DUNE = {
 } as const
 
 const SEVERANCE = { source: 'tmdb', sourceId: '95396', title: 'Severance', type: 'series', year: 2022 } as const
+
+const BOTH_DUNES = [{ ...DUNE, sourceId: 'movie/841', year: 1984 }, DUNE]
 
 const saveButton = async () => (await screen.findByText('שמירה')).closest('ion-button')
 
@@ -232,6 +243,31 @@ describe('adding a title', () => {
     expect(await db.entries.count()).toBe(1)
   })
 
+  it('lets a search result be added when only a title added by hand shares its name', async () => {
+    await db.entries.add(entry({ title: 'Dune', type: 'movie' }))
+    stubSearchResults(BOTH_DUNES)
+    renderAt('/tabs/home')
+    await searchFor('dune')
+    await screen.findByText(/1984/)
+
+    expect(screen.queryByText('כבר ברשימה')).not.toBeInTheDocument()
+
+    await pickResult(/1984/)
+    await save()
+
+    expect(await db.entries.count()).toBe(2)
+  })
+
+  it('marks a result as listed when a title added by hand has its name and year', async () => {
+    await db.entries.add(entry({ title: 'Dune', type: 'movie', releaseYear: 2021 }))
+    stubSearchResults(BOTH_DUNES)
+    renderAt('/tabs/home')
+    await searchFor('dune')
+
+    expect(await screen.findAllByText('כבר ברשימה')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: /2021.*כבר ברשימה/ })).toBeVisible()
+  })
+
   it('treats a poster address that is not a URL as a failed search, so it never reaches a backup', async () => {
     stubSearchResults([{ ...DUNE, posterUrl: 'not a url' }])
     renderAt('/tabs/home')
@@ -312,6 +348,35 @@ describe('adding a title', () => {
     await searchFor('zzzz')
 
     expect(await screen.findByText('לא נמצאו תוצאות')).toBeVisible()
+  })
+
+  it('announces the search from a status line that is there before anything is typed', async () => {
+    stubSearchResults([])
+    renderAt('/tabs/home')
+    await openAdd()
+
+    const status = await searchStatus()
+
+    expect(status).toBeEmptyDOMElement()
+
+    await typeQuery('zzzz')
+
+    expect(status).toHaveTextContent('חיפוש…')
+    await waitFor(() => expect(status).toHaveTextContent('לא נמצאו תוצאות'))
+  })
+
+  it.each([
+    ['no source answered', () => stubSearchResults([], { unavailable: ['tmdb', 'openlibrary'] }), 'החיפוש לא זמין כרגע'],
+    ['the search failed', stubSearchFailure, 'החיפוש לא זמין כרגע'],
+    ['a source is missing', () => stubSearchResults([DUNE], { unavailable: ['igdb'] }), 'חלק ממקורות החיפוש'],
+  ])('announces it when %s', async (_case, stub, message) => {
+    stub()
+    renderAt('/tabs/home')
+    await searchFor('dune')
+
+    const status = await searchStatus()
+
+    await waitFor(() => expect(status).toHaveTextContent(message))
   })
 
   it('limits a search to what the search service accepts', async () => {

@@ -10,7 +10,7 @@ import { type Entry, isShowType } from '../../domain/types'
 import { isTmdbShowId, type TitleDetails } from '../../search/client'
 import { DETAILS_COPY } from './copy'
 import { type DetailsPanel, detailsPanels } from './detailsPanels'
-import { useTitleDetails } from './useTitleDetails'
+import { type TitleDetailsState, useTitleDetails } from './useTitleDetails'
 import './titleDetails.css'
 
 export type TitleIdentity = Pick<Entry, 'title' | 'type' | 'posterUrl' | 'releaseYear' | 'endYear'>
@@ -67,12 +67,23 @@ function Panel({ title, rows, caption }: DetailsPanel) {
   )
 }
 
+const hasNothingToShow = (details: TitleDetails, isShow: boolean) =>
+  detailsPanels(details, isShow).length === 0 && details.genres.length === 0
+
+function statusMessage(state: TitleDetailsState, isShow: boolean) {
+  if (state.kind === 'loading') {
+    return DETAILS_COPY.loading
+  }
+
+  if (state.kind === 'failed') {
+    return DETAILS_COPY.unavailable
+  }
+
+  return hasNothingToShow(state.details, isShow) ? DETAILS_COPY.nothingToShow : undefined
+}
+
 function LoadedDetails({ details, isShow }: { details: TitleDetails; isShow: boolean }) {
   const panels = detailsPanels(details, isShow)
-
-  if (panels.length === 0 && details.genres.length === 0) {
-    return <p className="details-status">{DETAILS_COPY.nothingToShow}</p>
-  }
 
   return (
     <>
@@ -96,6 +107,9 @@ function LoadedDetails({ details, isShow }: { details: TitleDetails; isShow: boo
 export function TitleDetailsPage({ titleId, identity, backLabel, onBack }: TitleDetailsPageProps) {
   const { state, retry } = useTitleDetails(titleId)
   const backButton = useRef<HTMLButtonElement>(null)
+  const isFailed = state.kind === 'failed'
+  const isShow = isTmdbShowId(titleId)
+  const message = statusMessage(state, isShow)
 
   useEffect(() => backButton.current?.focus(), [])
 
@@ -114,16 +128,17 @@ export function TitleDetailsPage({ titleId, identity, backLabel, onBack }: Title
             identity={identity}
             originalTitle={state.kind === 'loaded' ? state.details.originalTitle : undefined}
           />
-          {state.kind === 'loading' && <p className="details-status">{DETAILS_COPY.loading}</p>}
-          {state.kind === 'failed' && (
+          {message && (
             <div className="details-status">
-              <p>{DETAILS_COPY.unavailable}</p>
-              <button type="button" className="details-retry" onClick={retry}>
-                {DETAILS_COPY.retry}
-              </button>
+              <p role="status">{message}</p>
+              {isFailed && (
+                <button type="button" className="details-retry" onClick={retry}>
+                  {DETAILS_COPY.retry}
+                </button>
+              )}
             </div>
           )}
-          {state.kind === 'loaded' && <LoadedDetails details={state.details} isShow={isTmdbShowId(titleId)} />}
+          {state.kind === 'loaded' && !message && <LoadedDetails details={state.details} isShow={isShow} />}
         </div>
       </IonContent>
     </div>

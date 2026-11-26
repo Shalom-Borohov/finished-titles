@@ -199,6 +199,24 @@ describe('loading more search results', () => {
     expect(screen.queryByText('לא הצלחנו לטעון עוד')).not.toBeInTheDocument()
   })
 
+  it('announces loading the next page, and its failure, from the same status line', async () => {
+    const { reply, release } = holdingPage(2, failingOnce(2, pagesReply(TWO_DUNE_PAGES)))
+
+    stubSearchPages(reply)
+    renderAt('/tabs/home')
+    await searchFor('dune')
+    await screen.findByText('Dune')
+    await revealEndOfResults()
+
+    const line = await screen.findByText('טוען עוד…')
+
+    expect(line).toHaveRole('status')
+
+    release()
+
+    await waitFor(() => expect(line).toHaveTextContent('לא הצלחנו לטעון עוד'))
+  })
+
   it('drops the earlier pages on a new search, and pages it from the start', async () => {
     const fetchStub = stubSearchPages(duneOrElse(pagesReply(TWO_DUNE_PAGES), pagesReply(TWO_SEVERANCE_PAGES)))
 

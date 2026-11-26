@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { db } from '../../src/data/db'
 import { pickResult, pressButton, searchFor } from '../helpers/addFlow'
@@ -154,6 +154,28 @@ describe('more details about a title', () => {
     expect(await screen.findByText('Dan Erickson')).toBeInTheDocument()
     expect(detailsCalls(fetchStub)).toHaveLength(2)
     expect(screen.queryByText('הפרטים לא זמינים כרגע')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['their failure', () => new Response(null, { status: 502 }), 'הפרטים לא זמינים כרגע'],
+    ['that there is nothing more', () => Response.json({ originalTitle: 'Severance' }), 'אין פרטים נוספים'],
+  ])('announces loading the details, and %s, from the same status line', async (_case, outcome, message) => {
+    let answer: () => void = () => {}
+
+    const reply = new Promise<Response>((resolve) => {
+      answer = () => resolve(outcome())
+    })
+
+    stubSearchResults([SEVERANCE], { detailsReply: () => reply })
+    await openDetailsOf(SEVERANCE)
+
+    const line = await screen.findByText('טוען פרטים…')
+
+    expect(line).toHaveRole('status')
+
+    answer()
+
+    await waitFor(() => expect(line).toHaveTextContent(message))
   })
 
   it('says there is nothing more when the reply has no details', async () => {

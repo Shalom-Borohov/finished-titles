@@ -33,7 +33,7 @@ type EntryFilter = {
   genre?: Genre
 }
 
-type ExistingCandidate = Pick<Entry, 'title' | 'type' | 'source' | 'sourceId'>
+type ExistingCandidate = Pick<Entry, 'title' | 'type' | 'source' | 'sourceId' | 'releaseYear'>
 
 export type HomeTile = {
   type: MediaType
@@ -42,6 +42,13 @@ export type HomeTile = {
 }
 
 const normalizedTitle = (title: string) => title.trim().toLowerCase()
+
+const COMBINING_MARKS = /\p{M}/gu
+
+const PUNCTUATION_SYMBOLS_AND_SPACES = /[\p{P}\p{S}\s]/gu
+
+const searchFolded = (text: string) =>
+  text.normalize('NFD').replace(COMBINING_MARKS, '').toLowerCase().replace(PUNCTUATION_SYMBOLS_AND_SPACES, '')
 
 function compareFinishDates(first: string, second: string) {
   const yearDifference = finishYear(second) - finishYear(first)
@@ -93,7 +100,7 @@ export function verdictLabel(entry: Entry) {
 }
 
 export function filterEntries(entries: Entry[], { type, status, query, rating, genre }: EntryFilter) {
-  const searchedTitle = normalizedTitle(query)
+  const searchedTitle = searchFolded(query)
 
   return entries.filter(
     (entry) =>
@@ -101,7 +108,7 @@ export function filterEntries(entries: Entry[], { type, status, query, rating, g
       (status === ALL_STATUSES || entry.status === status) &&
       (!rating || entry.rating === rating) &&
       (!genre || entry.genres?.includes(genre)) &&
-      normalizedTitle(entry.title).includes(searchedTitle),
+      (!searchedTitle || searchFolded(entry.title).includes(searchedTitle)),
   )
 }
 
@@ -142,7 +149,13 @@ export function findExisting(entries: Entry[], candidate: ExistingCandidate) {
   if (candidate.source && candidate.sourceId) {
     return (
       entries.find(({ source, sourceId }) => source === candidate.source && sourceId === candidate.sourceId) ??
-      entries.find((entry) => !entry.source && hasSameTitle(entry))
+      entries.find(
+        (entry) =>
+          !entry.source &&
+          entry.releaseYear !== undefined &&
+          entry.releaseYear === candidate.releaseYear &&
+          hasSameTitle(entry),
+      )
     )
   }
 
