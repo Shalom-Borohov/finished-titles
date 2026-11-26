@@ -38,6 +38,12 @@
   --app-radius-card: 20px;
   --app-radius-poster: 18px;
   --app-radius-pill: 999px;
+
+  --app-tab-bar-height: 60px;
+  --app-tab-bar-gap: 12px;
+  --app-tab-bar-inset: 16px;
+  --app-tab-clearance: 96px;
+  --app-floating-bar-room: 0px;
 }
 
 body {
@@ -89,10 +95,10 @@ ion-content::part(scroll) {
   --color: var(--app-ink-soft);
   --color-selected: var(--app-accent);
   position: absolute;
-  inset-inline: 16px;
-  bottom: calc(12px + env(safe-area-inset-bottom));
+  inset-inline: var(--app-tab-bar-inset);
+  bottom: calc(var(--app-tab-bar-gap) + env(safe-area-inset-bottom));
   z-index: 10;
-  height: 60px;
+  height: var(--app-tab-bar-height);
   padding: 0;
   border-radius: 30px;
   box-shadow: var(--app-shadow);
@@ -120,7 +126,7 @@ ion-content::part(scroll) {
 
 .page-body {
   min-height: 100%;
-  padding: calc(16px + env(safe-area-inset-top)) 16px calc(96px + env(safe-area-inset-bottom));
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(var(--app-tab-clearance) + var(--app-floating-bar-room) + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 

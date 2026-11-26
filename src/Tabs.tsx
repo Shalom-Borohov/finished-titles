@@ -1,5 +1,7 @@
 import { IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react'
 import { Navigate, Route } from 'react-router-dom'
+import { UPDATE_BAR_SHOWN_CLASS, UpdateBar } from './appUpdate/UpdateBar'
+import { useUpdateBar } from './appUpdate/useUpdateBar'
 import { GridIcon, SlidersIcon, StatsIcon } from './components/icons'
 import { COMMON_COPY } from './copy/common'
 import { HOME_PATH, SETTINGS_PATH, STATS_PATH } from './navigation/paths'
@@ -9,8 +11,10 @@ import { SettingsPage } from './pages/settings/SettingsPage'
 import { StatsPage } from './pages/stats/StatsPage'
 
 export function Tabs() {
+  const updateBar = useUpdateBar()
+
   return (
-    <IonTabs>
+    <IonTabs className={updateBar.shown ? UPDATE_BAR_SHOWN_CLASS : undefined}>
       <IonRouterOutlet>
         <Route path="home" element={<HomePage />} />
         <Route path="home/:type" element={<ListPage />} />
@@ -18,6 +22,7 @@ export function Tabs() {
         <Route path="settings" element={<SettingsPage />} />
         <Route index element={<Navigate to="home" replace />} />
       </IonRouterOutlet>
+      <UpdateBar {...updateBar} />
       <IonTabBar slot="bottom" className="floating-tab-bar">
         <IonTabButton tab="home" href={HOME_PATH}>
           <GridIcon />

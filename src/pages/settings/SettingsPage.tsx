@@ -1,10 +1,10 @@
 import { IonContent, IonPage, useIonAlert } from '@ionic/react'
 import { type ChangeEvent, useRef } from 'react'
+import { BACKUP_FILE_ACCEPT, backupReadFailure, readChosenBackup, shareStoredBackup } from '../../components/backupFile'
 import { ImportIcon, ShareIcon } from '../../components/icons'
 import { useMessageToast } from '../../components/useMessageToast'
 import { COMMON_COPY } from '../../copy/common'
-import { type Backup, exportBackup, NewerBackupError, parseBackup, restoreBackup } from '../../data/backup'
-import { BACKUP_FILE_ACCEPT, shareBackup } from './backupFile'
+import { type Backup, restoreBackup } from '../../data/backup'
 import { SETTINGS_COPY } from './copy'
 import { FeedbackSettings } from './FeedbackSettings'
 import { GenreFillSettings } from './GenreFillSettings'
@@ -19,7 +19,7 @@ export function SettingsPage() {
 
   async function exportData() {
     try {
-      await shareBackup(await exportBackup(Date.now()))
+      await shareStoredBackup()
     } catch {
       void toast(COMMON_COPY.actionFailed)
     }
@@ -36,29 +36,24 @@ export function SettingsPage() {
 
   function confirmRestore(backup: Backup) {
     presentAlert({
-      header: SETTINGS_COPY.importBackup,
-      message: SETTINGS_COPY.importWarning,
+      header: COMMON_COPY.importBackup,
+      message: COMMON_COPY.importWarning,
       buttons: [
         { text: COMMON_COPY.cancel, role: 'cancel' },
-        { text: SETTINGS_COPY.confirmImport, role: 'destructive', handler: () => void restore(backup) },
+        { text: COMMON_COPY.confirmImport, role: 'destructive', handler: () => void restore(backup) },
       ],
     })
   }
 
   async function importFile(event: ChangeEvent<HTMLInputElement>) {
-    const input = event.currentTarget
-    const file = input.files?.[0]
-
-    input.value = ''
-
-    if (!file) {
-      return
-    }
-
     try {
-      confirmRestore(parseBackup(await file.text()))
+      const backup = await readChosenBackup(event.currentTarget)
+
+      if (backup) {
+        confirmRestore(backup)
+      }
     } catch (error) {
-      void toast(error instanceof NewerBackupError ? SETTINGS_COPY.newerBackup : SETTINGS_COPY.invalidBackup)
+      void toast(backupReadFailure(error))
     }
   }
 
@@ -72,11 +67,11 @@ export function SettingsPage() {
             <h2>{SETTINGS_COPY.backup}</h2>
             <button type="button" className="settings-action" onClick={() => void exportData()}>
               <ShareIcon />
-              {SETTINGS_COPY.exportBackup}
+              {COMMON_COPY.exportBackup}
             </button>
             <button type="button" className="settings-action" onClick={() => fileInput.current?.click()}>
               <ImportIcon />
-              {SETTINGS_COPY.importBackup}
+              {COMMON_COPY.importBackup}
             </button>
             <p className="settings-note">{SETTINGS_COPY.storageNote}</p>
           </section>
@@ -100,7 +95,7 @@ export function SettingsPage() {
             type="file"
             accept={BACKUP_FILE_ACCEPT}
             hidden
-            aria-label={SETTINGS_COPY.backupFile}
+            aria-label={COMMON_COPY.backupFile}
             onChange={(event) => void importFile(event)}
           />
         </div>

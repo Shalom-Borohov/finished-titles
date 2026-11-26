@@ -38,6 +38,12 @@ export const MinusIcon = () => (
   </LineIcon>
 )
 
+export const CloseIcon = () => (
+  <LineIcon size={20} strokeWidth={2.4}>
+    <path d="M5 5l10 10M15 5 5 15" />
+  </LineIcon>
+)
+
 export const BackChevronIcon = () => (
   <LineIcon size={20} strokeWidth={2.4}>
     <path d="M7 4l6 6-6 6" />
