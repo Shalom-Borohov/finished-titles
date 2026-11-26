@@ -3,6 +3,7 @@ import { exportBackup, NewerBackupError, parseBackup, restoreBackup } from '../.
 import { db } from '../../src/data/db'
 import { addEntry, allEntries } from '../../src/data/repo'
 import { entrySchema, GENRES, MEDIA_TYPES, RATINGS, SEARCH_SOURCES, STATUSES } from '../../src/domain/types'
+import { freezeDate } from '../helpers/clock'
 import { resetDb } from '../helpers/db'
 import { entry } from '../helpers/entries'
 
@@ -253,5 +254,17 @@ describe('backup', () => {
 
     expect(() => parseBackup('{oops')).toThrow()
     expect(await db.entries.count()).toBe(1)
+  })
+
+  describe('a title finished after today', () => {
+    freezeDate(NOW)
+
+    it.each(['2099-12-31', '2099'])('restores its date %s as it is', async (finishedOn) => {
+      const later = entry({ title: 'Dune', finishedOn })
+
+      await restoreBackup(parseBackup(backupText([later])))
+
+      expect(await allEntries()).toEqual([later])
+    })
   })
 })
