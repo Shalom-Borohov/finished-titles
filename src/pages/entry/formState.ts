@@ -1,6 +1,7 @@
 import type { EntryDraft } from '../../data/repo'
+import { earliestFinishYear, knownSeasonCount, type YearLimit } from '../../domain/fieldLimits'
 import { finishYear, isFinishDate, isFutureFinishDate, isYearOnly } from '../../domain/finishDate'
-import { type Entry, fittingStatus } from '../../domain/types'
+import { type Entry, fittingStatus, isShowType } from '../../domain/types'
 import { ENTRY_COPY } from './copy'
 
 export const DATE_KINDS = ['exact', 'year', 'none'] as const
@@ -48,7 +49,13 @@ function finishedOnOf({ dateKind, exactDate, yearText }: DateFields) {
   return dateKind === 'year' ? yearText : exactDate
 }
 
-export function dateProblem(form: EntryFormState, today: string, savedOn?: string) {
+export const lastSeasonOf = (form: EntryFormState, airedSeasons?: number) =>
+  isShowType(form.type) ? knownSeasonCount(form, airedSeasons) : undefined
+
+export const earliestYearOf = (form: EntryFormState, today: string, airedSeasons?: number) =>
+  earliestFinishYear(form, { thisYear: finishYear(today), lastSeason: lastSeasonOf(form, airedSeasons) })
+
+export function dateProblem(form: EntryFormState, today: string, savedOn?: string, earliest?: YearLimit) {
   const finishedOn = finishedOnOf(form)
 
   if (finishedOn === undefined) {
@@ -59,9 +66,31 @@ export function dateProblem(form: EntryFormState, today: string, savedOn?: strin
     return form.dateKind === 'year' ? ENTRY_COPY.invalidYear : ENTRY_COPY.invalidDate
   }
 
-  const isChangedToFuture = finishedOn !== savedOn && isFutureFinishDate(finishedOn, today)
+  if (finishedOn === savedOn) {
+    return undefined
+  }
 
-  return isChangedToFuture ? ENTRY_COPY.futureDate : undefined
+  if (isFutureFinishDate(finishedOn, today)) {
+    return ENTRY_COPY.futureDate
+  }
+
+  if (earliest && finishYear(finishedOn) < earliest.year) {
+    return earliest.reason === 'end' ? ENTRY_COPY.beforeEnd(earliest.year) : ENTRY_COPY.beforeRelease(earliest.year)
+  }
+
+  return undefined
+}
+
+export function seasonProblem(form: EntryFormState, airedSeasons?: number, saved?: Entry) {
+  const field = form.status === 'stopped' ? 'stoppedSeason' : 'seasons'
+  const season = form[field]
+  const lastSeason = lastSeasonOf(form, airedSeasons)
+
+  if (season === undefined || lastSeason === undefined || season === saved?.[field] || season <= lastSeason) {
+    return undefined
+  }
+
+  return ENTRY_COPY.onlySeasons(lastSeason)
 }
 
 const isOngoing = ({ status }: EntryFormState) => status === 'ongoing'

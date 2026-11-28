@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { Segmented } from '../../components/formFields'
 import { MinusIcon, PlusIcon } from '../../components/icons'
 import { RATING_LABELS } from '../../copy/labels'
-import { finishYear, isYearOnly } from '../../domain/finishDate'
+import { finishYear, firstDayOf, isYearOnly } from '../../domain/finishDate'
 import { type Rating, RATINGS } from '../../domain/types'
 import { ENTRY_COPY } from './copy'
 import { DATE_KINDS, type EntryFormState } from './formState'
@@ -46,44 +46,56 @@ export function RatingPills({ legend, selected, onSelect }: RatingPillsProps) {
 type SeasonStepperProps = {
   label: string
   season?: number
+  lastSeason?: number
+  problem?: string
   onChange: (season?: number) => void
 }
 
-export function SeasonStepper({ label, season, onChange }: SeasonStepperProps) {
+export function SeasonStepper({ label, season, lastSeason, problem, onChange }: SeasonStepperProps) {
   const lower = () => onChange(season && season > FIRST_SEASON ? season - 1 : undefined)
+  const canRaise = lastSeason === undefined || (season ?? 0) < lastSeason
 
   return (
-    <div className="stepper">
-      <span className="stepper-label">{label}</span>
-      <span className="stepper-controls">
-        <button type="button" className="icon-button" aria-label={ENTRY_COPY.oneSeasonLess} disabled={!season} onClick={lower}>
-          <MinusIcon />
-        </button>
-        <span className="stepper-count">{season ?? ENTRY_COPY.noValue}</span>
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={ENTRY_COPY.oneSeasonMore}
-          onClick={() => onChange((season ?? 0) + 1)}
-        >
-          <PlusIcon />
-        </button>
-      </span>
-    </div>
+    <>
+      <div className="stepper">
+        <span className="stepper-label">{label}</span>
+        <span className="stepper-controls">
+          <button type="button" className="icon-button" aria-label={ENTRY_COPY.oneSeasonLess} disabled={!season} onClick={lower}>
+            <MinusIcon />
+          </button>
+          <span className="stepper-count">{season ?? ENTRY_COPY.noValue}</span>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={ENTRY_COPY.oneSeasonMore}
+            disabled={!canRaise}
+            onClick={() => onChange((season ?? 0) + 1)}
+          >
+            <PlusIcon />
+          </button>
+        </span>
+      </div>
+      {problem && (
+        <p className="form-problem" role="alert">
+          {problem}
+        </p>
+      )}
+    </>
   )
 }
 
 type YearStepperProps = {
   yearText: string
+  firstYear?: number
   thisYear: number
   onChange: (yearText: string) => void
 }
 
-function YearStepper({ yearText, thisYear, onChange }: YearStepperProps) {
+function YearStepper({ yearText, firstYear, thisYear, onChange }: YearStepperProps) {
   const inputId = useId()
   const year = Number(yearText)
   const hasYear = isYearOnly(yearText)
-  const canLower = hasYear && isYearOnly(String(year - 1))
+  const canLower = hasYear && isYearOnly(String(year - 1)) && (firstYear === undefined || year > firstYear)
   const canRaise = hasYear && year < thisYear
   const stepTo = (next: number) => onChange(String(next))
 
@@ -128,11 +140,12 @@ type DateFieldsProps = {
   legend: string
   form: EntryFormState
   today: string
+  firstYear?: number
   problem?: string
   onChange: (changes: Partial<EntryFormState>) => void
 }
 
-export function DateFields({ legend, form, today, problem, onChange }: DateFieldsProps) {
+export function DateFields({ legend, form, today, firstYear, problem, onChange }: DateFieldsProps) {
   return (
     <fieldset className="form-group">
       <legend>{legend}</legend>
@@ -148,6 +161,7 @@ export function DateFields({ legend, form, today, problem, onChange }: DateField
           <span>{ENTRY_COPY.exactDate}</span>
           <input
             type="date"
+            min={firstYear === undefined ? undefined : firstDayOf(firstYear)}
             max={today}
             value={form.exactDate}
             onChange={(event) => onChange({ exactDate: event.target.value })}
@@ -155,7 +169,12 @@ export function DateFields({ legend, form, today, problem, onChange }: DateField
         </label>
       )}
       {form.dateKind === 'year' && (
-        <YearStepper yearText={form.yearText} thisYear={finishYear(today)} onChange={(yearText) => onChange({ yearText })} />
+        <YearStepper
+          yearText={form.yearText}
+          firstYear={firstYear}
+          thisYear={finishYear(today)}
+          onChange={(yearText) => onChange({ yearText })}
+        />
       )}
       {problem && (
         <p className="form-problem" role="alert">
