@@ -29,6 +29,7 @@ export const ENTRY_COPY = {
   noValue: '—',
   oneSeasonLess: 'עונה אחת פחות',
   oneSeasonMore: 'עונה אחת יותר',
+  onlySeasons: (count: number) => (count === 1 ? 'יצאה רק עונה אחת' : `יצאו רק ${count} עונות`),
   whyStopped: 'למה עצרתי?',
   dateLegends: {
     finished: 'מתי סיימתי?',
@@ -45,6 +46,8 @@ export const ENTRY_COPY = {
   futureDate: 'התאריך לא יכול להיות בעתיד',
   invalidDate: 'התאריך לא תקין',
   invalidYear: 'צריך שנה בת ארבע ספרות',
+  beforeRelease: (year: number) => `התאריך לא יכול להיות לפני ${year}, השנה שבה יצא`,
+  beforeEnd: (year: number) => `התאריך לא יכול להיות לפני ${year}, השנה שבה נגמר`,
   note: 'הערה',
   notePlaceholder: 'מה נשאר איתך? לא חובה',
   duplicateTitle: 'כותר בשם הזה כבר ברשימה',

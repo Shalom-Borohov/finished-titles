@@ -2,6 +2,11 @@ import type { Release } from './releases'
 
 export const CHANGELOG: Release[] = [
   {
+    version: '1.3.0',
+    features: ['התאריך ומספר העונות בטופס נבדקים מול שנת היציאה, שנת הסיום ומספר העונות שיצאו'],
+    fixes: [],
+  },
+  {
     version: '1.2.0',
     features: [
       'בסטטיסטיקה: סך השעות, ולצד כל סוג כמה שעות הוא לקח',

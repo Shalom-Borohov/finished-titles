@@ -39,5 +39,7 @@ export const isFinishDate = (text: string) => isYearOnly(text) || isRealDate(tex
 
 export const finishYear = (finishedOn: string) => Number(finishedOn.slice(0, YEAR_LENGTH))
 
+export const firstDayOf = (year: number) => `${year}-01-01`
+
 export const isFutureFinishDate = (finishedOn: string, today: string) =>
   isYearOnly(finishedOn) ? finishYear(finishedOn) > finishYear(today) : finishedOn > today

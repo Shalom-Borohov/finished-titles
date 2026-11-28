@@ -16,7 +16,15 @@ import { ENTRY_COPY } from './copy'
 import { DateFields, RatingPills, SeasonStepper } from './formFields'
 import { FormIdentity } from './FormIdentity'
 import { GenreField } from './GenreField'
-import { dateProblem, draftFromForm, type EntryFormState, withChanges } from './formState'
+import {
+  dateProblem,
+  draftFromForm,
+  earliestYearOf,
+  type EntryFormState,
+  lastSeasonOf,
+  seasonProblem,
+  withChanges,
+} from './formState'
 import { HoursField } from './HoursField'
 import { MoreDetailsRow } from './MoreDetailsRow'
 import { usePickPrefill } from './usePickPrefill'
@@ -33,6 +41,7 @@ type EntryFormProps = {
 
 export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onClose }: EntryFormProps) {
   const [form, setForm] = useState(initial)
+  const [airedSeasons, setAiredSeasons] = useState<number>()
   const [isSaving, setIsSaving] = useState(false)
   const [showingDetails, setShowingDetails] = useState(false)
   const moreDetailsRow = useRef<HTMLButtonElement>(null)
@@ -44,19 +53,24 @@ export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onC
   const isStopped = form.status === 'stopped'
   const isShow = isShowType(form.type)
   const isGame = isGameType(form.type)
-  const problem = dateProblem(form, today, editing?.finishedOn)
+  const earliestYear = earliestYearOf(form, today, airedSeasons)
+  const problem = dateProblem(form, today, editing?.finishedOn, earliestYear)
+  const lastSeason = lastSeasonOf(form, airedSeasons)
+  const problemWithSeasons = seasonProblem(form, airedSeasons, editing)
   const hasTitle = form.title.trim() !== ''
   const duplicate = !editing && !isSaving && hasTitle ? findExisting(entries ?? [], form) : undefined
   const detailsTitleId = tmdbTitleId(form)
   const sheetTitle = editing ? ENTRY_COPY.editTitle : COMMON_COPY.addTitle
 
   usePickPrefill(pickedTitleId, {
-    onShow: ({ seasons, endYear }) =>
+    onShow: ({ seasons, endYear }) => {
+      setAiredSeasons(seasons > 0 ? seasons : undefined)
       setForm((current) => ({
         ...current,
         seasons: current.seasons === undefined && seasons > 0 ? seasons : current.seasons,
         endYear: endYear ?? current.endYear,
-      })),
+      }))
+    },
     onLength: (lengthMinutes) => setForm((current) => ({ ...current, lengthMinutes })),
   })
 
@@ -102,7 +116,7 @@ export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onC
             className="save-button"
             fill="solid"
             shape="round"
-            disabled={!hasTitle || Boolean(problem) || isSaving}
+            disabled={!hasTitle || Boolean(problem) || Boolean(problemWithSeasons) || isSaving}
             onClick={() => void save()}
           >
             {ENTRY_COPY.save}
@@ -137,6 +151,8 @@ export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onC
               <SeasonStepper
                 label={ENTRY_COPY.stoppedAtSeason}
                 season={form.stoppedSeason}
+                lastSeason={lastSeason}
+                problem={problemWithSeasons}
                 onChange={(stoppedSeason) => change({ stoppedSeason })}
               />
             )}
@@ -159,6 +175,8 @@ export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onC
               <SeasonStepper
                 label={ENTRY_COPY.seasonsWatched}
                 season={form.seasons}
+                lastSeason={lastSeason}
+                problem={problemWithSeasons}
                 onChange={(seasons) => change({ seasons })}
               />
             )}
@@ -169,6 +187,7 @@ export function EntryForm({ initial, editing, pickedTitleId, onOpenExisting, onC
               legend={ENTRY_COPY.dateLegends[form.status]}
               form={form}
               today={today}
+              firstYear={earliestYear?.year}
               problem={problem}
               onChange={change}
             />
